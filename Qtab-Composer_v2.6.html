@@ -511,8 +511,12 @@ document.addEventListener('DOMContentLoaded', function() {
     return true;
   }
 
-  // --- SAVE STEP BUTTON ---
-  document.getElementById('saveStepBtn').addEventListener('click', () => {
+
+  // --- BUTTON HANDLERS (CORRECTLY INSIDE DOMContentLoaded) ---
+  
+  // Save Step - FIXED!
+  document.getElementById('saveStepBtn').addEventListener('click', (e) => {
+    e.preventDefault();
     const dur = currentDuration();
     const sel = collectCurrentNotesAscending();
     if (!sel.length) {
@@ -521,7 +525,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     phrase.push({ notes: sel, duration: dur });
     updateSteps();
-    notify('Step added!');
+    notify('✅ Step saved!');
     clearErr();
   });
 
@@ -592,14 +596,17 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // --- SAVE PHRASE BUTTON ---
-  document.getElementById('savePhraseBtn').addEventListener('click', () => {
-    const nm = getName();
-    if (!nm) return;
-    localStorage.setItem('qtab_phrase_' + nm, JSON.stringify(phrase));
-    notify('Saved "' + nm + '" to library!');
-    loadLibrary();
-  });
+	// Save Phrase - ONLY refresh when actually saving
+	document.getElementById('savePhraseBtn').addEventListener('click', () => {
+	  const nm = getName();
+	  if (!nm) return;
+	  localStorage.setItem('qtab_phrase_' + nm, JSON.stringify(phrase));
+	  notify('Saved "' + nm + '" to library!');
+	  loadLibrary(); // Only here - controlled refresh
+	});
+
+  // --- END BUTTON HANDLERS (CORRECTLY INSIDE DOMContentLoaded) ---
+
 
   // --- STEPS DISPLAY / EDIT ---
   function updateSteps() {
@@ -667,40 +674,42 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // --- LIBRARY ---
-  function loadLibrary() {
-    const keys = Object.keys(localStorage).filter(k => k.startsWith('qtab_phrase_'));
-    phraseLibrary.replaceChildren();
-    if (!keys.length) {
-      phraseLibrary.innerHTML = '<em>No saved phrases</em>';
-      return;
-    }
-    phraseLibrary.innerHTML = '<h3>(' + keys.length + ' phrases)</h3>' +
-      keys.map(k => {
-        const n = k.replace('qtab_phrase_', '');
-        return `<div><strong>${n}</strong><br>
-          <select data-a="menu" data-n="${n}" class="step-menu library-menu">
-            <option value="">Select...</option>
-            <option value="load">Load</option>
-            <option value="addSteps">Add to Steps</option>
-            <option value="rename">Rename</option>
-            <option value="dup">Duplicate</option>
-            <option value="export">Export JSON</option>
-            <option value="exportqtab">Export .qtab</option>
-            <option value="del">❌ Delete</option>
-          </select></div><br>`;
-      }).join('');
-
-    phraseLibrary.querySelectorAll('select[data-a="menu"]').forEach(sel => {
-      sel.addEventListener('change', e => {
-        const a = e.target.value;
-        const n = e.target.dataset.n;
-        if (!a) return;
-        libAction(a, n);
-        e.target.value = '';
-      });
-    });
+// --- LIBRARY ---
+// --- (EVENT DELEGATION - NO MORE DUPLICATES!) ---
+function loadLibrary() {
+  const keys = Object.keys(localStorage).filter(k => k.startsWith('qtab_phrase_'));
+  phraseLibrary.replaceChildren();
+  if (!keys.length) {
+    phraseLibrary.innerHTML = '<em>No saved phrases</em>';
+    return;
   }
+  phraseLibrary.innerHTML = '<h3>(' + keys.length + ' phrases)</h3>' +
+    keys.map(k => {
+      const n = k.replace('qtab_phrase_', '');
+      return `<div><strong>${n}</strong><br>
+        <select data-a="menu" data-n="${n}" class="step-menu library-menu">
+          <option value="">Select...</option>
+          <option value="load">Load</option>
+          <option value="addSteps">Add to Steps</option>
+          <option value="rename">Rename</option>
+          <option value="dup">Duplicate</option>
+          <option value="export">Export JSON</option>
+          <option value="exportqtab">Export .qtab</option>
+          <option value="del">❌ Delete</option>
+        </select></div><br>`;
+    }).join('');
+  
+  // SINGLE EVENT DELEGATION - handles ALL library menus forever
+  phraseLibrary.addEventListener('change', (e) => {
+    if (e.target.matches('select[data-a="menu"]')) {
+      const a = e.target.value;
+      const n = e.target.dataset.n;
+      if (!a || !n) return;
+      libAction(a, n);
+      e.target.value = '';
+    }
+  }, { once: false });
+}
 
   function libAction(a, n) {
     const key = 'qtab_phrase_' + n;
