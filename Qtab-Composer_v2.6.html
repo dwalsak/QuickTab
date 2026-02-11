@@ -366,17 +366,23 @@ document.addEventListener('DOMContentLoaded', function() {
         labelEl.textContent = state.active ? 'On' : 'Off';
       }
     }
+	
 
-    toggle.addEventListener('change', () => {
-      stringStates[stringNum].active = toggle.checked;
-      if (stringStates[stringNum].active && (stringStates[stringNum].value === null || stringStates[stringNum].value === 'X')) {
-        stringStates[stringNum].value = 'X';
-      }
-      if (!stringStates[stringNum].active) {
-        stringStates[stringNum].value = null;
-      }
-      updateDisplay();
-    });
+		toggle.addEventListener('change', () => {
+			stringStates[stringNum].active = toggle.checked;
+			const sliderEl = document.getElementById('slider' + stringNum);  // Cache for reuse
+			
+			if (stringStates[stringNum].active && (stringStates[stringNum].value === null || stringStates[stringNum].value === 'X')) {
+				stringStates[stringNum].value = 'X';
+			}
+			if (!stringStates[stringNum].active) {
+				stringStates[stringNum].value = null;
+				sliderEl.value = 0;  // Explicitly reset slider DOM value
+				sliderEl.dispatchEvent(new Event('input', { bubbles: true }));  // Force thumb refresh
+			}
+			updateDisplay();
+		});
+
 
     slider.addEventListener('input', () => {
       if (stringStates[stringNum].active) {
