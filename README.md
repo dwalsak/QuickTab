@@ -1,6 +1,6 @@
 # QuickTab
 
-QTab Composer is a modular web-based music notation app, evolved from decades of pencil-and-paper design. Built with HTML5, JavaScript, and Web Audio API, it lets users compose and archive musical phrases. Python tools convert .qtab files to MIDI, connecting notation to DAW workflows.
+QTab Composer is a modular, web-based music notation app, evolved from decades of pencil‑and‑paper design. It adapts the immediacy of hand-drawn shorthand into a digital system for composing and archiving musical phrases. Built with HTML5, JavaScript, and the Web Audio API, QTab supports intuitive phrase editing and playback, while Python tools convert `.qtab` files to MIDI, seamlessly connecting notation to DAW workflows and other creative processes.  
 
 **Try It Now**
 
@@ -43,13 +43,13 @@ Both are valid.
 
 **Why QTab Rocks**
 
-•	Write guitar ideas faster than TAB paper
-•	No music reading — just string numbers + frets
-•	Rhythm built‑in — quarters, eighths, dotted everything
-•	GarageBand ready — one drag, instant playback
+•	Write guitar ideas faster than TAB paper  
+•	No music reading — just string numbers + frets  
+•	Rhythm built‑in — quarters, eighths, dotted everything  
+•	GarageBand ready — one drag, instant playback  
 
-* Exporting to .mid requires Python. (See the section on Python Installation -- web link.)
-** .qtab files are ready-to-parse into .mid (MIDI) or standard TAB using Python.
+\* Exporting to .mid requires Python. (See the section on Python Installation -- web link.)  
+\*\* .qtab files are ready-to-parse into .mid (MIDI) or standard TAB using Python.
 
 
 Copyright & License
