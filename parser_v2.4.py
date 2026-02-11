@@ -103,7 +103,10 @@ def quicktab_to_midi(song_input, filename="song.mid"):
 
     # Process parts
     for part in simple_parts:
+        
         if part.startswith('CHORD_'):
+            # FIX: Detect dot from placeholder AND base duration from original chord
+            has_dot = part.endswith('.')
             chord_part = part.replace('.', '').split('_')[1]
             try:
                 chord_idx = int(chord_part)
@@ -111,8 +114,9 @@ def quicktab_to_midi(song_input, filename="song.mid"):
                     chord_content = chords[chord_idx]
                     full_chord = chord_full_texts[chord_idx]
                     
-                    # –> durations                   
-                    dur_str = full_chord[-1] if full_chord[-1] in DURATION_MAP else 'q'
+                    # FIXED: Build dur_str from BOTH sources
+                    base = full_chord[-1] if full_chord[-1] in 'qwehts' else 'q'
+                    dur_str = base + '.' if has_dot and (base + '.') in DURATION_MAP else base
                     
                     dur = DURATION_MAP[dur_str]
                     print(f"  🎸 PLAYING CHORD {chord_idx} (dur={dur}): {chord_content}")
@@ -131,6 +135,7 @@ def quicktab_to_midi(song_input, filename="song.mid"):
                     time += dur
             except:
                 continue
+
         elif ':' in part:
             # FIXED SINGLE NOTES (your proven version)
             dur_str = 'q'
