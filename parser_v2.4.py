@@ -175,4 +175,5 @@ if __name__ == "__main__":
         quicktab_to_midi("Demo_Song.qtab")
 
 
-# python3 parser_v2.4.py Durations.qtab
+# Example Terminal Command (assumes the .qtab is in the current directory)
+# --> python3 parser_v2.4.py G-Blues-Boogie.qtab
