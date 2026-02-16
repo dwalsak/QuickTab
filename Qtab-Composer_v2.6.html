@@ -680,10 +680,21 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+
 // --- LIBRARY ---
-// --- (EVENT DELEGATION - NO MORE DUPLICATES!) ---
 function loadLibrary() {
-  const keys = Object.keys(localStorage).filter(k => k.startsWith('qtab_phrase_'));
+  const keys = Object.keys(localStorage)
+    .filter(k => k.startsWith('qtab_phrase_'));
+
+  // NEW: sort keys by the visible phrase name (alphanumeric)
+  keys.sort((a, b) => {
+    const nameA = a.replace('qtab_phrase_', '').toLowerCase();
+    const nameB = b.replace('qtab_phrase_', '').toLowerCase();
+    if (nameA < nameB) return -1;
+    if (nameA > nameB) return 1;
+    return 0;
+  });
+
   phraseLibrary.replaceChildren();
   if (!keys.length) {
     phraseLibrary.innerHTML = '<em>No saved phrases</em>';
@@ -704,8 +715,7 @@ function loadLibrary() {
           <option value="del">❌ Delete</option>
         </select></div><br>`;
     }).join('');
-  
-  // SINGLE EVENT DELEGATION - handles ALL library menus forever
+
   phraseLibrary.addEventListener('change', (e) => {
     if (e.target.matches('select[data-a="menu"]')) {
       const a = e.target.value;
