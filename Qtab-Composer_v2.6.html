@@ -234,7 +234,7 @@
 <body>
 <header>
 	<nav>
-		<h1><a href="#home" class="logo">QTab Composer <span class="info" style="color: white;padding-top:10px;">v 2.6</span></a></h1>  
+		<h1><a href="#home" class="logo">QTab Composer <span class="info" style="color: white;padding:8px 0 0 8px;"> v 2.6</span></a></h1>  
 	</nav>
 </header>
 
@@ -269,7 +269,7 @@
   
   <div style="margin: 20px 0;">
     <label>Save Phrase: <span class="info">(Saves entire phrase to library.)</span></label>
-    <button id="savePhraseBtn" class="btn-wide blue">Save Phrase</button>
+    <button id="savePhraseBtn" class="btn-wide blue" type="button">Save Phrase</button>
     
     <label>Additional Actions: <span class="info">(Strings / Step Editor)</span></label>
     <select id="actionMenu" class="btn-wide blue">
@@ -603,12 +603,21 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
 	// Save Phrase - ONLY refresh when actually saving
-	document.getElementById('savePhraseBtn').addEventListener('click', () => {
-	  const nm = getName();
-	  if (!nm) return;
-	  localStorage.setItem('qtab_phrase_' + nm, JSON.stringify(phrase));
-	  notify('Saved "' + nm + '" to library!');
-	  loadLibrary(); // Only here - controlled refresh
+	document.getElementById('savePhraseBtn').addEventListener('click', (e) => {
+		e.preventDefault();
+		const nm = getName();
+		if (!nm) return;
+	
+		const key = 'qtab_phrase_' + nm;
+		const exists = localStorage.getItem(key) !== null;
+		
+		if (exists && !confirm(`"${nm}" already exists in library.\n\nOverwrite with current version?`)) {
+			return;
+		}
+		
+		localStorage.setItem(key, JSON.stringify(phrase));
+		notify(`✅ "${nm}" saved to library - keep building!`);
+		loadLibrary();
 	});
 
   // --- END BUTTON HANDLERS (CORRECTLY INSIDE DOMContentLoaded) ---
