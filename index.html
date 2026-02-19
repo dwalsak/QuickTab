@@ -42,7 +42,24 @@
 	.hero{background:linear-gradient(135deg,var(--accent) 0%,var(--accent-alt) 100%);color:white;padding:4rem 1rem 3rem;max-width:1200px;margin:0 auto;text-align:center;border-radius:0 0 1rem 1rem}
 	.hero h1{font:700 3rem;line-height:1.1;margin-bottom:1rem}
 	.hero p{font-size:1.25rem;margin-bottom:2rem;opacity:.95}
-	.grid{display:grid;gap:2rem;padding:3rem 1rem;max-width:1200px;margin:0 auto;grid-template-columns:repeat(auto-fit,minmax(320px,1fr))} 
+	
+	.grid{
+	display:grid;
+	gap:2rem;
+	padding:3rem 1rem;
+	max-width:1200px;
+	margin:0 auto;
+	grid-template-columns:repeat(auto-fit,minmax(320px,1fr))
+	} 
+	
+	.bottomgrid{
+	display:grid;
+	padding:3rem 1rem;
+	max-width:1200px;
+	margin:0 auto;
+	grid-template-columns:repeat(auto-fit,minmax(320px,1fr))
+	} 
+	.bottomgrid p{margin:0 3rem;padding:.5rem 0;}
 
 	.demo-frame {
 	  width: 80%;          /* desktop/tablet */
@@ -215,9 +232,25 @@
   </div>
 </section>
 
+
+<section class="bottomgrid">
+  <div style="grid-column:1/-1;text-align:left">
+    <h3 style="text-align:center">From the Developer</h3>
+    
+    <p>QuickTab (QTab) represents the latest phase in a lifelong exploration of modularity — from visual and structural experiments in book design and typography to sonic and time-based systems.</p>
+    
+<p>Conceived as a modular notation language, QuickTab extends the idea of reading and composing beyond the page. It offers a framework where sound, motion, and visual form can coexist and inform one another.</p>
+
+<p>Its beautifully simple syntax invites both precision and play, enabling applications from musical composition to generative graphics and kinetic environments. By translating modular thinking into the sonic domain, QuickTab continues an inquiry into fluid systems of representation — shifting seamlessly between art, design, and technology.</p>
+    
+  </div>
+</section>
+
+
 <footer>
   <p><strong>QTab Composer v2.6</strong><br>
-  Copyright © 2026 Dennis M. Walsak • <a href="QuickTab_Primer_v1.pdf">QuickTab Primer</a> • <a href="LICENSE.md">MIT License</a></p>
+  Copyright © 2026 Dennis M. Walsak<br>
+  <a href="QuickTab_Primer_v1.pdf">QuickTab Primer</a> • <a href="LICENSE.md">MIT License</a></p>
   <p><a href="https://modularmedia.com/qtab">modularmedia.com/qtab</a></p>
 </footer>
 
