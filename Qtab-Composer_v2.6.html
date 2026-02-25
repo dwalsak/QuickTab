@@ -196,6 +196,19 @@
 		font-size: 0.9rem;
 		margin-left: 0.75rem;
 	}
+	
+	.step-menu.has-copy::after {
+		content: " ✓"; 
+		color: var(--accent-green);
+		font-weight: bold;
+		font-size: 0.9em;
+	}
+	
+	.step-menu.has-copy {
+		border-color: var(--accent-green) !important;
+		background: rgba(50, 205, 50, 0.1) !important;
+	}
+
 	.library-menu {
 		background: var(--accent) !important; 
 		color: white !important;
@@ -323,6 +336,8 @@ document.addEventListener('DOMContentLoaded', function() {
   const resultBox = document.getElementById('result');
   const strings = ['e (1)', 'B (2)', 'G (3)', 'D (4)', 'A (5)', 'E (6)'];
   const stringStates = {};
+  
+  let copiedStep = null;  // Step clipboard state
 
   // --- BUILD STRING UI ---
   strings.forEach((label, i) => {
@@ -367,22 +382,20 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
 	
-
-		toggle.addEventListener('change', () => {
-			stringStates[stringNum].active = toggle.checked;
-			const sliderEl = document.getElementById('slider' + stringNum);  // Cache for reuse
-			
-			if (stringStates[stringNum].active && (stringStates[stringNum].value === null || stringStates[stringNum].value === 'X')) {
-				stringStates[stringNum].value = 'X';
-			}
-			if (!stringStates[stringNum].active) {
-				stringStates[stringNum].value = null;
-				sliderEl.value = 0;  // Explicitly reset slider DOM value
-				sliderEl.dispatchEvent(new Event('input', { bubbles: true }));  // Force thumb refresh
-			}
-			updateDisplay();
-		});
-
+    toggle.addEventListener('change', () => {
+      stringStates[stringNum].active = toggle.checked;
+      const sliderEl = document.getElementById('slider' + stringNum);  
+      
+      if (stringStates[stringNum].active && (stringStates[stringNum].value === null || stringStates[stringNum].value === 'X')) {
+        stringStates[stringNum].value = 'X';
+      }
+      if (!stringStates[stringNum].active) {
+        stringStates[stringNum].value = null;
+        sliderEl.value = 0;
+        sliderEl.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+      updateDisplay();
+    });
 
     slider.addEventListener('input', () => {
       if (stringStates[stringNum].active) {
@@ -472,7 +485,6 @@ document.addEventListener('DOMContentLoaded', function() {
     return notes;
   }
 
-  // Build FLAT .qtab string for MIDI parser
   function buildQtabSongString(steps) {
     return steps.map(p => {
       const notes = p.notes.map(n => n);
@@ -517,10 +529,7 @@ document.addEventListener('DOMContentLoaded', function() {
     return true;
   }
 
-
-  // --- BUTTON HANDLERS (CORRECTLY INSIDE DOMContentLoaded) ---
-  
-  // Save Step - FIXED!
+  // --- BUTTON HANDLERS ---
   document.getElementById('saveStepBtn').addEventListener('click', (e) => {
     e.preventDefault();
     const dur = currentDuration();
@@ -535,7 +544,7 @@ document.addEventListener('DOMContentLoaded', function() {
     clearErr();
   });
 
-  // --- ADDITIONAL ACTIONS ---
+  // --- ACTION MENU ---
   document.getElementById('actionMenu').addEventListener('change', (e) => {
     const act = e.target.value;
     if (!act) return;
@@ -567,23 +576,28 @@ document.addEventListener('DOMContentLoaded', function() {
       });
       updateSteps();
       notify('Arpeggio < added!');
-
+      
     } else if (act === 'reset') {
       resetStringEditor();
+      copiedStep = null;
+      // FIXED: Only step editor menus
+      stepsList.querySelectorAll('.step-menu').forEach(m => m.classList.remove('has-copy'));
       notify('Strings reset.');
-
+      
     } else if (act === 'new') {
       if (!confirm('Start a new phrase? This will clear the current phrase steps.')) return;
+      copiedStep = null;
+      // FIXED: Only step editor menus
+      stepsList.querySelectorAll('.step-menu').forEach(m => m.classList.remove('has-copy'));
       phrase.length = 0;
       updateSteps();
       resetStringEditor();
       resultBox.style.display = 'none';
       document.getElementById('phraseName').value = '';
       notify('New phrase started.');
-
+      
     } else if (act === 'view') {
       updatePreview();
-
     } else if (act === 'copy') {
       const ok = updatePreview();
       if (!ok) return;
@@ -596,32 +610,28 @@ document.addEventListener('DOMContentLoaded', function() {
         () => notify('MIDI-ready qtab copied!'),
         () => notify('Clipboard copy failed.', 'error')
       );
-
     } else if (act === 'library') {
       phraseLibrary.scrollIntoView({ behavior: 'smooth' });
     }
   });
 
-	// Save Phrase - ONLY refresh when actually saving
-	document.getElementById('savePhraseBtn').addEventListener('click', (e) => {
-		e.preventDefault();
-		const nm = getName();
-		if (!nm) return;
-	
-		const key = 'qtab_phrase_' + nm;
-		const exists = localStorage.getItem(key) !== null;
-		
-		if (exists && !confirm(`"${nm}" already exists in library.\n\nOverwrite with current version?`)) {
-			return;
-		}
-		
-		localStorage.setItem(key, JSON.stringify(phrase));
-		notify(`✅ "${nm}" saved to library - keep building!`);
-		loadLibrary();
-	});
+  // Save Phrase
+  document.getElementById('savePhraseBtn').addEventListener('click', (e) => {
+    e.preventDefault();
+    const nm = getName();
+    if (!nm) return;
 
-  // --- END BUTTON HANDLERS (CORRECTLY INSIDE DOMContentLoaded) ---
-
+    const key = 'qtab_phrase_' + nm;
+    const exists = localStorage.getItem(key) !== null;
+    
+    if (exists && !confirm(`"${nm}" already exists in library.\n\nOverwrite with current version?`)) {
+      return;
+    }
+    
+    localStorage.setItem(key, JSON.stringify(phrase));
+    notify(`✅ "${nm}" saved to library - keep building!`);
+    loadLibrary();
+  });
 
   // --- STEPS DISPLAY / EDIT ---
   function updateSteps() {
@@ -637,8 +647,11 @@ document.addEventListener('DOMContentLoaded', function() {
           <span class="editable">${i + 1}. [${notes.join(', ')}]${duration}</span>
           <select class="step-menu">
             <option value="">...</option>
-            <option value="edit">Edit</option>
+            <option value="copy">Copy</option>
+            <option value="pasteBefore">Paste Before</option>
+            <option value="pasteAfter">Paste After</option>
             <option value="insert">Insert</option>
+            <option value="edit">Edit</option>
             <option value="del">Delete</option>
           </select>
         </div>`;
@@ -650,6 +663,49 @@ document.addEventListener('DOMContentLoaded', function() {
         const act = e.target.value;
         if (!act) return;
 
+        // FIXED: Copy - Only step editor menus
+        if (act === 'copy') {
+          copiedStep = JSON.parse(JSON.stringify(phrase[idx]));
+          notify(`Copied step ${idx + 1}. Ready to paste!`);
+          
+          // FIXED: Only step editor menus glow green
+          stepsList.querySelectorAll('.step-menu').forEach(m => {
+            m.classList.add('has-copy');
+          });
+          
+          e.target.value = '';
+          return;
+        }
+
+        // Paste Before
+        if (act === 'pasteBefore') {
+          if (!copiedStep) {
+            showError('Nothing copied yet. Copy a step first.');
+            e.target.value = '';
+            return;
+          }
+          phrase.splice(idx, 0, JSON.parse(JSON.stringify(copiedStep)));
+          updateSteps();
+          notify('Pasted before step ' + (idx + 1));
+          e.target.value = '';
+          return;
+        }
+        
+        // Paste After
+        if (act === 'pasteAfter') {
+          if (!copiedStep) {
+            showError('Nothing copied yet. Copy a step first.');
+            e.target.value = '';
+            return;
+          }
+          phrase.splice(idx + 1, 0, JSON.parse(JSON.stringify(copiedStep)));
+          updateSteps();
+          notify('Pasted after step ' + (idx + 1));
+          e.target.value = '';
+          return;
+        }
+
+        // Other actions
         if (act === 'del') {
           if (confirm('Delete this step?')) {
             phrase.splice(idx, 1);
@@ -664,7 +720,6 @@ document.addEventListener('DOMContentLoaded', function() {
           }
           phrase.splice(idx, 0, { notes: sel, duration: dur });
           updateSteps();
-
         } else if (act === 'edit') {
           const p = phrase[idx];
           const notes = p.notes || [];
@@ -689,52 +744,50 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+  // --- LIBRARY (unchanged) ---
+  function loadLibrary() {
+    const keys = Object.keys(localStorage)
+      .filter(k => k.startsWith('qtab_phrase_'));
 
-// --- LIBRARY ---
-function loadLibrary() {
-  const keys = Object.keys(localStorage)
-    .filter(k => k.startsWith('qtab_phrase_'));
+    keys.sort((a, b) => {
+      const nameA = a.replace('qtab_phrase_', '').toLowerCase();
+      const nameB = b.replace('qtab_phrase_', '').toLowerCase();
+      if (nameA < nameB) return -1;
+      if (nameA > nameB) return 1;
+      return 0;
+    });
 
-  // NEW: sort keys by the visible phrase name (alphanumeric)
-  keys.sort((a, b) => {
-    const nameA = a.replace('qtab_phrase_', '').toLowerCase();
-    const nameB = b.replace('qtab_phrase_', '').toLowerCase();
-    if (nameA < nameB) return -1;
-    if (nameA > nameB) return 1;
-    return 0;
-  });
-
-  phraseLibrary.replaceChildren();
-  if (!keys.length) {
-    phraseLibrary.innerHTML = '<em>No saved phrases</em>';
-    return;
-  }
-  phraseLibrary.innerHTML = '<h3>(' + keys.length + ' phrases)</h3>' +
-    keys.map(k => {
-      const n = k.replace('qtab_phrase_', '');
-      return `<div><strong>${n}</strong><br>
-        <select data-a="menu" data-n="${n}" class="step-menu library-menu">
-          <option value="">Select...</option>
-          <option value="load">Load</option>
-          <option value="addSteps">Add to Steps</option>
-          <option value="rename">Rename</option>
-          <option value="dup">Duplicate</option>
-          <option value="export">Export JSON</option>
-          <option value="exportqtab">Export .qtab</option>
-          <option value="del">❌ Delete</option>
-        </select></div><br>`;
-    }).join('');
-
-  phraseLibrary.addEventListener('change', (e) => {
-    if (e.target.matches('select[data-a="menu"]')) {
-      const a = e.target.value;
-      const n = e.target.dataset.n;
-      if (!a || !n) return;
-      libAction(a, n);
-      e.target.value = '';
+    phraseLibrary.replaceChildren();
+    if (!keys.length) {
+      phraseLibrary.innerHTML = '<em>No saved phrases</em>';
+      return;
     }
-  }, { once: false });
-}
+    phraseLibrary.innerHTML = '<h3>(' + keys.length + ' phrases)</h3>' +
+      keys.map(k => {
+        const n = k.replace('qtab_phrase_', '');
+        return `<div><strong>${n}</strong><br>
+          <select data-a="menu" data-n="${n}" class="step-menu library-menu">
+            <option value="">Select...</option>
+            <option value="load">Load</option>
+            <option value="addSteps">Add to Steps</option>
+            <option value="rename">Rename</option>
+            <option value="dup">Duplicate</option>
+            <option value="export">Export JSON</option>
+            <option value="exportqtab">Export .qtab</option>
+            <option value="del">❌ Delete</option>
+          </select></div><br>`;
+      }).join('');
+
+    phraseLibrary.addEventListener('change', (e) => {
+      if (e.target.matches('select[data-a="menu"]')) {
+        const a = e.target.value;
+        const n = e.target.dataset.n;
+        if (!a || !n) return;
+        libAction(a, n);
+        e.target.value = '';
+      }
+    }, { once: false });
+  }
 
   function libAction(a, n) {
     const key = 'qtab_phrase_' + n;
@@ -846,7 +899,7 @@ function loadLibrary() {
     notify('Exported all phrases as JSON.');
   });
 
-  // --- IMPORT ---
+  // --- IMPORT (unchanged) ---
   const importZone = document.getElementById('importZone');
   importZone.addEventListener('dragover', e => {
     e.preventDefault();
@@ -907,5 +960,6 @@ function loadLibrary() {
   resetStringEditor();
 });
 </script>
+
 </body>
 </html>
