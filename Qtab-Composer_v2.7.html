@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QTab Composer v2.7</title>
+<style>
+	:root {
+		--bg: #fafafa; --bg-alt: #fff; --text: #222; 
+		--accent: #0066cc; --accent-alt: #e3f2fd; --accent-green: #32cd32;
+		--border: #e0e0e0; 
+		--shadow: 0 2px 4px rgba(0,0,0,0.15), 0 8px 25px rgba(0,0,0,0.25);
+	}
+	* { box-sizing: border-box; margin: 0; padding: 0; }
+	body {
+		font: 400 1.1rem/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+		color: var(--text); background: var(--bg);
+		max-width: 720px; margin: 20px auto; padding: 40px 20px 20px 20px;
+	}
+	header {
+		position: sticky; top: 0; height: 50px;
+		backdrop-filter: blur(10px); z-index: 100;
+		background-color: black; color: white;
+		box-shadow: var(--shadow);
+	}
+	header nav {
+		display: flex; justify-content: space-between; align-items: center;
+		padding: 0 .5rem; height: 50px; line-height: 50px;
+	}
+	.logo { font: 700 1.5rem; color: white !important; text-decoration: none; line-height: 1; display: flex; align-items: center; }
+	.info { font-weight: normal; font-family: sans-serif; font-size: .8rem; }
+
+	button, input[type="button"], input[type="submit"], .btn, select {
+		-webkit-appearance: none; -moz-appearance: none; appearance: none;
+		margin: 0; padding: 0; border: none; border-radius: 0;
+		background: none; font: inherit; cursor: pointer; display: inline-block; text-align: center; text-decoration: none;
+	}
+	.btn-wide, button {
+		width: 100%; padding: 1rem; border-radius: 0.75rem;
+		font-weight: 600; font-size: 1.1rem;
+		transition: all 0.2s; box-shadow: var(--shadow);
+		margin: 0.5rem 0;
+	}
+	.btn-wide.blue { background: var(--accent); color: white; }
+	.btn-wide.green { background: var(--accent-green); color: white; }
+	.btn-wide:hover { transform: translateY(-1px); }
+	#phraseName {
+		width: 100%; border: 3px solid var(--accent); border-radius: 8px;
+		padding: 12px 16px; font-size: 1.25rem; font-weight: 600;
+		background: white; box-shadow: 0 2px 8px rgba(0,102,204,0.1);
+		margin-bottom: 24px;
+	}
+	label {
+		display: block; margin: 12px 0 8px 0;
+		font-family: sans-serif; font-weight: bold; font-size: 1.2rem;
+	}
+	h1, h2 { font-weight: bold; font-family: sans-serif; font-size: 1.5rem; margin: 12px 0; }
+	h2 { font-size: 1.2rem; }
+	
+	select {
+	  font: 1.1rem -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+	}
+	
+	#actionMenu {
+	  font: 1.1rem -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+	}
+	
+	#actionMenu option {
+	  font: 1.1rem -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+	}
+	
+	.library-menu, .library-menu option {
+	  font: 1.1rem -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+	}
+	
+	/* STRING SLIDER FRETBOARD */
+	.string-box {
+		background: #f0f0f0;
+		border: 1px solid #ddd;
+		border-radius: 4px;
+		padding: 12px;
+		margin: 20px 0;
+		font-family: monospace;
+		width: 100%;
+		max-width: 600px;
+		transition: background 0.2s ease;
+	}
+	.string-header {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		margin-bottom: 8px;
+	}
+	.slider-container { padding: 0 8px; }
+	.string-label {
+		font-weight: bold;
+		color: #333;
+		min-width: 40px;
+		font-size: 14px;
+	}
+	.radio-container {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+	}
+	.radio-container input[type="checkbox"] {
+		width: 18px;
+		height: 18px;
+		accent-color: var(--accent-green);
+		transform: scale(1.2);
+		transition: all 0.2s ease;
+	}
+	.fret-display {
+		font-size: 18px;
+		font-weight: bold;
+		min-width: 40px;
+		text-align: center;
+		color: #666;
+	}
+	input[type="range"] {
+		width: 100%;
+		height: 8px;
+		border-radius: 5px;
+		background: #ffffff;
+		outline: none;
+		-webkit-appearance: none;
+	}
+	input[type="range"]::-webkit-slider-thumb {
+		-webkit-appearance: none;
+		appearance: none;
+		width: 22px;
+		height: 22px;
+		border-radius: 50%;
+		background: #666;
+		cursor: pointer;
+		border: 2px solid #fff;
+		transition: background 0.2s ease;
+	}
+	input[type="range"]:active::-webkit-slider-thumb,
+	input[type="range"].active-slider::-webkit-slider-thumb {
+		background: var(--accent-green) !important;
+	}
+	.active { background: #d4f4d4 !important; }
+	.slider-dimmed { opacity: 0.4; }
+
+	@media (min-width: 768px) {
+		.string-box {
+			padding: 12px;
+			display: flex !important;
+			align-items: center;
+			gap: 12px;
+			flex-wrap: nowrap;
+			width: 100% !important;
+			max-width: none !important;
+		}
+		.string-header {
+			flex: 0 0 auto;
+			margin-bottom: 0 !important;
+			gap: 6px;
+		}
+		.slider-container {
+			flex: 1;
+			padding: 0;
+			margin: 0;
+		}
+		.string-label, .fret-display {
+			font-size: 16px;
+		}
+	}
+
+	.steps {
+		background: var(--bg-alt); border: 1px solid var(--border);
+		padding: 10px; margin: 10px 0; white-space: normal;
+		text-align: left; margin-left: 20px;
+	}
+	.qtab-output {
+		background: var(--bg-alt); border: 1px solid var(--border);
+		padding: 10px; margin: 10px 0; white-space: pre-wrap;
+	}
+	.error { color: #ef4444; font-weight: bold; }
+	.phrase-list div { margin: 3px 0; }
+
+	.step-row {
+		margin: 0 0 2px 0 !important; padding: 2px 0;
+		transition: background 0.3s ease;
+	}
+	.step-row:hover { background: var(--accent-alt) !important; }
+	#stepsList { line-height: 1.2; }
+	.step-row span.editable { cursor: pointer; color: var(--accent); }
+
+	.step-menu, .library-menu {
+		padding: 0.5rem 0.75rem; 
+		border: 1px solid var(--border); 
+		border-radius: 0.5rem;
+		background: white;
+		font-size: 0.9rem;
+		margin-left: 0.75rem;
+	}
+	
+	.step-menu.has-copy::after {
+		content: " ✓"; 
+		color: var(--accent-green);
+		font-weight: bold;
+		font-size: 0.9em;
+	}
+	
+	.step-menu.has-copy {
+		border-color: var(--accent-green) !important;
+		background: rgba(50, 205, 50, 0.1) !important;
+	}
+
+	.library-menu {
+		background: var(--accent) !important; 
+		color: white !important;
+		padding: 0.5rem 1rem !important; 
+		border-radius: 0.75rem !important;
+		font-weight: 600 !important; 
+		min-width: 180px !important;
+	}
+	.step-menu:hover, .library-menu:hover {
+		border-color: var(--accent); 
+		box-shadow: 0 2px 4px rgba(0,102,204,0.1);
+	}
+	.library-menu:hover { transform: translateY(-1px) !important; }
+
+	.notify { 
+		position:fixed;top:70px;right:20px;z-index:10000;background:#00D800;color:white;
+		padding:12px 20px;border-radius:8px;font-weight:600;box-shadow:var(--shadow);
+		transform:translateX(400px);transition:all 0.3s;max-width:320px; 
+	}
+	.notify.error { background:#ef4444; }
+	.notify.show { transform:translateX(0); }
+
+	.import-zone {
+		border: 2px dashed var(--border); padding: 20px; 
+		text-align: center; margin: 10px 0; cursor: pointer;
+	}
+	.import-zone.dragover {
+		border-color: var(--accent); background: var(--accent-alt);
+	}
+
+	a { color: var(--accent); }
+	a:visited { color: #0052a3; }
+	
+</style>
+</head>
+<body>
+<header>
+	<nav>
+		<h1><a href="#home" class="logo">QTab Composer <span class="info" style="color: white;padding:8px 0 0 8px;"> v 2.7</span></a></h1>  
+	</nav>
+</header>
+
+<form id="phraseForm" style="padding-top:12px;">
+  <label for="phraseName">Phrase Name: <span class="info">(Web safe name, no breaks.)</span></label>
+  <input type="text" id="phraseName" maxlength="80" placeholder="MyPhrase1" style="margin-bottom: 24px;">
+
+  <h2>Strings / Step Editor</h2>
+  <div id="noteSelectors"></div>
+  
+  <hr style="margin: 24px 0 12px 0">
+  <label>Duration: <span class="info">(Select duration of each step.)</span></label>
+  <select id="durationSel">
+    <option value="t">t (.125)</option>
+    <option value="t.">t. (.1875)</option>
+    <option value="s">s (0.25)</option>
+    <option value="s.">s. (0.375)</option>
+    <option value="e" selected>e (0.5 beat)</option>
+    <option value="e.">e. (0.75 beat)</option>
+    <option value="q">q (1)</option>
+    <option value="q.">q. (1.5)</option>
+    <option value="h">h (2)</option>
+    <option value="h.">h. (3)</option>
+    <option value="w">w (4)</option>
+    <option value="w.">w. (6)</option>
+  </select>
+  
+  <hr style="margin: 12px 0">
+  
+  <label>Save Step: <span class="info">(Saves current step to Editor below.)</span></label>
+  <button id="saveStepBtn" class="btn-wide green">Save Step</button>
+  
+  <div style="margin: 20px 0;">
+    <label>Save Phrase: <span class="info">(Saves entire phrase to library.)</span></label>
+    <button id="savePhraseBtn" class="btn-wide blue" type="button">Save Phrase</button>
+    
+    <label>Additional Actions: <span class="info">(Strings / Step Editor)</span></label>
+    <select id="actionMenu" class="btn-wide blue">
+      <option value="">Select...</option>
+      <option value="arpUp">Arpeggio Step &gt;</option>
+      <option value="arpDown">Arpeggio Step &lt;</option>
+      <option value="reset">Reset</option>
+      <option value="new">New Phrase</option>
+      <option value="view">Preview</option>
+      <option value="copy">Copy</option>
+      <option value="library">Library...</option>
+    </select>
+  </div>
+</form>
+
+<hr style="margin: 12px 0">
+<h2>Edit Steps</h2>
+<div id="stepsList" class="steps">No steps yet</div>
+<div id="error" class="error" style="display:none;"></div>
+
+<hr style="margin: 12px 0">
+<h2>Output Preview <span class="info">(MIDI-ready .qtab + JSON)</span></h2>
+<div id="result" class="qtab-output" style="display:none;"></div>
+
+<hr style="margin: 12px 0">
+<h2>Library <span class="info">(Modular components - build → save → reassemble!)</span></h2>
+<div class="import-zone" id="importZone">
+  <strong>📁 Import JSON</strong><br>
+  Drag & drop or click to select .json file
+</div>
+<div id="phraseLibrary" class="phrase-list"></div>
+
+<hr style="margin: 12px 0">
+<button id="exportAllBtn" style="margin-top: 18px;">Export All as JSON</button><span class="info"> (Library backup.)</span>
+
+<hr style="margin: 24px 0">
+<footer>
+  <p><strong>QTab Composer v2.7</strong><br>
+  Copyright © 2026 Dennis M. Walsak<br>
+  <a href="PRIMER.pdf" target="_blank">QuickTab Primer</a> • <a href="LICENSE.md" target="_blank">MIT License</a></p>
+  <p><a href="https://modularmedia.com/qtab" target="_blank">modularmedia.com/qtab</a></p>
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // --- GLOBALS ---
+  const phrase = [];
+  const noteSelectors = document.getElementById('noteSelectors');
+  const stepsList = document.getElementById('stepsList');
+  const phraseLibrary = document.getElementById('phraseLibrary');
+  const resultBox = document.getElementById('result');
+  const strings = ['e (1)', 'B (2)', 'G (3)', 'D (4)', 'A (5)', 'E (6)'];
+  const stringStates = {};
+  
+  let copiedStep = null;  // Step clipboard state
+
+  // --- BUILD STRING UI ---
+  strings.forEach((label, i) => {
+    const stringNum = i + 1;
+    stringStates[stringNum] = { active: false, value: null };
+
+    const div = document.createElement('div');
+    div.id = 'string' + stringNum;
+    div.className = 'string-box';
+    div.innerHTML = `
+      <div class="string-header">
+        <span class="string-label">${label}</span>
+        <div class="radio-container">
+          <input type="checkbox" id="toggle${stringNum}">
+          <label for="toggle${stringNum}" id="label${stringNum}">Off</label>
+        </div>
+        <span class="fret-display" id="fret${stringNum}">-</span>
+      </div>
+      <div class="slider-container">
+        <input type="range" id="slider${stringNum}" min="0" max="24" value="0" step="1">
+      </div>
+    `;
+    noteSelectors.appendChild(div);
+
+    const box = document.getElementById('string' + stringNum);
+    const toggle = document.getElementById('toggle' + stringNum);
+    const slider = document.getElementById('slider' + stringNum);
+    const fretDisplay = document.getElementById('fret' + stringNum);
+
+    function updateDisplay() {
+      const state = stringStates[stringNum];
+      fretDisplay.textContent = state.active
+        ? (state.value === 'X' || state.value === null ? 'X' : state.value)
+        : '-';
+      slider.classList.toggle('slider-dimmed', state.active && state.value === 'X');
+      slider.classList.toggle('active-slider', state.active && state.value !== 'X' && state.value !== null);
+      box.classList.toggle('active', state.active);
+      toggle.checked = state.active;
+      const labelEl = document.getElementById('label' + stringNum);
+      if (labelEl) {
+        labelEl.textContent = state.active ? 'On' : 'Off';
+      }
+    }
+	
+    toggle.addEventListener('change', () => {
+      stringStates[stringNum].active = toggle.checked;
+      const sliderEl = document.getElementById('slider' + stringNum);  
+      
+      if (stringStates[stringNum].active && (stringStates[stringNum].value === null || stringStates[stringNum].value === 'X')) {
+        stringStates[stringNum].value = 'X';
+      }
+      if (!stringStates[stringNum].active) {
+        stringStates[stringNum].value = null;
+        sliderEl.value = 0;
+        sliderEl.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+      updateDisplay();
+    });
+
+    slider.addEventListener('input', () => {
+      if (stringStates[stringNum].active) {
+        stringStates[stringNum].value = parseInt(slider.value, 10) || 0;
+        updateDisplay();
+      }
+    });
+
+    updateDisplay();
+  });
+
+  // --- NOTIFY ---
+  function notify(msg, type = 'success') {
+    document.querySelector('.notify')?.remove();
+    const div = document.createElement('div');
+    div.className = 'notify' + (type === 'error' ? ' error' : '');
+    div.textContent = msg;
+    document.body.appendChild(div);
+    setTimeout(() => div.classList.add('show'), 50);
+    setTimeout(() => {
+      div.classList.remove('show');
+      setTimeout(() => div.remove(), 300);
+    }, 2500);
+  }
+
+  // --- UTILS ---
+  function getName() {
+    const n = document.getElementById('phraseName').value.trim();
+    if (!n) {
+      showError('Enter phrase name first.');
+      return null;
+    }
+    return n;
+  }
+  function showError(m) {
+    const e = document.getElementById('error');
+    e.textContent = m;
+    e.style.display = 'block';
+  }
+  function clearErr() {
+    const e = document.getElementById('error');
+    e.textContent = '';
+    e.style.display = 'none';
+  }
+  function resetStringEditor() {
+    Object.keys(stringStates).forEach(i => {
+      stringStates[i].active = false;
+      stringStates[i].value = null;
+      const slider = document.getElementById('slider' + i);
+      if (slider) slider.value = 0;
+      
+      const box = document.getElementById('string' + i);
+      const toggle = document.getElementById('toggle' + i);
+      const fretDisplay = document.getElementById('fret' + i);
+      const labelEl = document.getElementById('label' + i);
+      
+      if (!box || !toggle || !fretDisplay) return;
+      
+      box.classList.remove('active');
+      toggle.checked = false;
+      fretDisplay.textContent = '-';
+      slider.classList.remove('active-slider', 'slider-dimmed');
+      if (labelEl) labelEl.textContent = 'Off';
+    });
+  }
+  function currentDuration() {
+    return document.getElementById('durationSel').value || 'e';
+  }
+  function collectCurrentNotesAscending() {
+    const notes = [];
+    for (let i = 1; i <= 6; i++) {
+      const st = stringStates[i];
+      if (st.active && st.value !== null) {
+        notes.push(i + ':' + st.value);
+      }
+    }
+    return notes;
+  }
+  function collectCurrentNotesDescending() {
+    const notes = [];
+    for (let i = 6; i >= 1; i--) {
+      const st = stringStates[i];
+      if (st.active && st.value !== null) {
+        notes.push(i + ':' + st.value);
+      }
+    }
+    return notes;
+  }
+
+  function buildQtabSongString(steps) {
+    return steps.map(p => {
+      const notes = p.notes.map(n => n);
+      if (notes.length === 1) {
+        return notes[0] + (p.duration || 'e');
+      } else {
+        return '[' + notes.join(',') + ']' + (p.duration || 'e');
+      }
+    }).join(',');
+  }
+
+  // --- PREVIEW ---
+  function updatePreview() {
+    const nm = getName();
+    if (!nm) return false;
+    if (!phrase.length) {
+      showError('No steps to preview.');
+      return false;
+    }
+    clearErr();
+    
+    const qtabSong = buildQtabSongString(phrase);
+    const qtabWithHeader = `#${nm}\n${qtabSong}`;
+    
+    const jsonObject = {};
+    jsonObject[nm] = phrase.map(p => ({
+      notes: p.notes.slice(),
+      duration: p.duration || 'e'
+    }));
+    const jsonPretty = JSON.stringify(jsonObject, null, 2);
+    
+    resultBox.innerHTML = `
+<span style="font-weight:bold;color:var(--accent);font-size:1.1em;">🎵 MIDI-Ready .qtab</span><br>
+<small>Copy this → save as .qtab → quicktab_to_midi()</small>
+<pre style="margin:10px 0;">${qtabWithHeader}</pre>
+
+<span style="font-weight:bold;color:var(--accent);font-size:1.1em;">📚 JSON Library</span><br>
+<small>For Composer import/export</small>
+<pre style="margin:10px 0;">${jsonPretty}</pre>
+    `;
+    resultBox.style.display = 'block';
+    return true;
+  }
+
+  // --- BUTTON HANDLERS ---
+  document.getElementById('saveStepBtn').addEventListener('click', (e) => {
+    e.preventDefault();
+    const dur = currentDuration();
+    const sel = collectCurrentNotesAscending();
+    if (!sel.length) {
+      showError('Toggle at least one string On to save step.');
+      return;
+    }
+    phrase.push({ notes: sel, duration: dur });
+    updateSteps();
+    notify('✅ Step saved!');
+    clearErr();
+  });
+
+  // --- ACTION MENU ---
+  document.getElementById('actionMenu').addEventListener('change', (e) => {
+    const act = e.target.value;
+    if (!act) return;
+    e.target.value = '';
+    clearErr();
+
+    if (act === 'arpUp') {
+      const dur = currentDuration();
+      const notes = collectCurrentNotesAscending();
+      if (!notes.length) {
+        showError('Toggle at least one string On for arpeggio step.');
+        return;
+      }
+      notes.forEach(n => {
+        phrase.push({ notes: [n], duration: dur });
+      });
+      updateSteps();
+      notify('Arpeggio > added!');
+
+    } else if (act === 'arpDown') {
+      const dur = currentDuration();
+      const notes = collectCurrentNotesDescending();
+      if (!notes.length) {
+        showError('Toggle at least one string On for arpeggio step.');
+        return;
+      }
+      notes.forEach(n => {
+        phrase.push({ notes: [n], duration: dur });
+      });
+      updateSteps();
+      notify('Arpeggio < added!');
+      
+    } else if (act === 'reset') {
+      resetStringEditor();
+      copiedStep = null;
+      // FIXED: Only step editor menus
+      stepsList.querySelectorAll('.step-menu').forEach(m => m.classList.remove('has-copy'));
+      notify('Strings reset.');
+      
+    } else if (act === 'new') {
+      if (!confirm('Start a new phrase? This will clear the current phrase steps.')) return;
+      copiedStep = null;
+      // FIXED: Only step editor menus
+      stepsList.querySelectorAll('.step-menu').forEach(m => m.classList.remove('has-copy'));
+      phrase.length = 0;
+      updateSteps();
+      resetStringEditor();
+      resultBox.style.display = 'none';
+      document.getElementById('phraseName').value = '';
+      notify('New phrase started.');
+      
+    } else if (act === 'view') {
+      updatePreview();
+    } else if (act === 'copy') {
+      const ok = updatePreview();
+      if (!ok) return;
+      const txt = resultBox.textContent.trim();
+      if (!txt) {
+        showError('Nothing to copy.');
+        return;
+      }
+      navigator.clipboard.writeText(txt).then(
+        () => notify('MIDI-ready qtab copied!'),
+        () => notify('Clipboard copy failed.', 'error')
+      );
+    } else if (act === 'library') {
+      phraseLibrary.scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+
+  // Save Phrase
+  document.getElementById('savePhraseBtn').addEventListener('click', (e) => {
+    e.preventDefault();
+    const nm = getName();
+    if (!nm) return;
+
+    const key = 'qtab_phrase_' + nm;
+    const exists = localStorage.getItem(key) !== null;
+    
+    if (exists && !confirm(`"${nm}" already exists in library.\n\nOverwrite with current version?`)) {
+      return;
+    }
+    
+    localStorage.setItem(key, JSON.stringify(phrase));
+    notify(`✅ "${nm}" saved to library - keep building!`);
+    loadLibrary();
+  });
+
+  // --- STEPS DISPLAY / EDIT ---
+  function updateSteps() {
+    if (!phrase.length) {
+      stepsList.textContent = 'No steps yet';
+      return;
+    }
+    stepsList.innerHTML = phrase.map((p, i) => {
+      const notes = Array.isArray(p.notes) ? p.notes : [];
+      const duration = p.duration || 'e';
+      return `
+        <div class="step-row" data-index="${i}">
+          <span class="editable">${i + 1}. [${notes.join(', ')}]${duration}</span>
+          <select class="step-menu">
+            <option value="">...</option>
+            <option value="copy">Copy</option>
+            <option value="pasteBefore">Paste Before</option>
+            <option value="pasteAfter">Paste After</option>
+            <option value="insert">Insert</option>
+            <option value="edit">Edit</option>
+            <option value="del">Delete</option>
+          </select>
+        </div>`;
+    }).join('');
+
+    stepsList.querySelectorAll('.step-menu').forEach(menu => {
+      menu.onchange = (e) => {
+        const idx = parseInt(menu.closest('.step-row').dataset.index, 10);
+        const act = e.target.value;
+        if (!act) return;
+
+        // FIXED: Copy - Only step editor menus
+        if (act === 'copy') {
+          copiedStep = JSON.parse(JSON.stringify(phrase[idx]));
+          notify(`Copied step ${idx + 1}. Ready to paste!`);
+          
+          // FIXED: Only step editor menus glow green
+          stepsList.querySelectorAll('.step-menu').forEach(m => {
+            m.classList.add('has-copy');
+          });
+          
+          e.target.value = '';
+          return;
+        }
+
+        // Paste Before
+        if (act === 'pasteBefore') {
+          if (!copiedStep) {
+            showError('Nothing copied yet. Copy a step first.');
+            e.target.value = '';
+            return;
+          }
+          phrase.splice(idx, 0, JSON.parse(JSON.stringify(copiedStep)));
+          updateSteps();
+          notify('Pasted before step ' + (idx + 1));
+          e.target.value = '';
+          return;
+        }
+        
+        // Paste After
+        if (act === 'pasteAfter') {
+          if (!copiedStep) {
+            showError('Nothing copied yet. Copy a step first.');
+            e.target.value = '';
+            return;
+          }
+          phrase.splice(idx + 1, 0, JSON.parse(JSON.stringify(copiedStep)));
+          updateSteps();
+          notify('Pasted after step ' + (idx + 1));
+          e.target.value = '';
+          return;
+        }
+
+        // Other actions
+        if (act === 'del') {
+          if (confirm('Delete this step?')) {
+            phrase.splice(idx, 1);
+            updateSteps();
+          }
+        } else if (act === 'insert') {
+          const dur = currentDuration();
+          const sel = collectCurrentNotesAscending();
+          if (!sel.length) {
+            showError('Select at least one note to insert.');
+            return;
+          }
+          phrase.splice(idx, 0, { notes: sel, duration: dur });
+          updateSteps();
+        } else if (act === 'edit') {
+          const p = phrase[idx];
+          const notes = p.notes || [];
+          const cur = notes.join(', ') + ' ' + (p.duration || 'e');
+          const repl = prompt('Edit step (eg 3:5 or 3:5,5:7 ; duration after space)', cur);
+          if (!repl || !repl.trim()) {
+            e.target.value = '';
+            return;
+          }
+          const trimmed = repl.trim();
+          const lastSpace = trimmed.lastIndexOf(' ');
+          const notesPart = lastSpace > 0 ? trimmed.slice(0, lastSpace) : trimmed;
+          const durPart = lastSpace > 0 ? trimmed.slice(lastSpace + 1) : 'e';
+          const newNotes = notesPart.split(',').map(x => x.trim()).filter(Boolean);
+          if (newNotes.length) {
+            phrase[idx] = { notes: newNotes, duration: durPart };
+            updateSteps();
+          }
+        }
+        e.target.value = '';
+      };
+    });
+  }
+
+  // --- LIBRARY (unchanged) ---
+  function loadLibrary() {
+    const keys = Object.keys(localStorage)
+      .filter(k => k.startsWith('qtab_phrase_'));
+
+    keys.sort((a, b) => {
+      const nameA = a.replace('qtab_phrase_', '').toLowerCase();
+      const nameB = b.replace('qtab_phrase_', '').toLowerCase();
+      if (nameA < nameB) return -1;
+      if (nameA > nameB) return 1;
+      return 0;
+    });
+
+    phraseLibrary.replaceChildren();
+    if (!keys.length) {
+      phraseLibrary.innerHTML = '<em>No saved phrases</em>';
+      return;
+    }
+    phraseLibrary.innerHTML = '<h3>(' + keys.length + ' phrases)</h3>' +
+      keys.map(k => {
+        const n = k.replace('qtab_phrase_', '');
+        return `<div><strong>${n}</strong><br>
+          <select data-a="menu" data-n="${n}" class="step-menu library-menu">
+            <option value="">Select...</option>
+            <option value="load">Load</option>
+            <option value="addSteps">Add to Steps</option>
+            <option value="rename">Rename</option>
+            <option value="dup">Duplicate</option>
+            <option value="export">Export JSON</option>
+            <option value="exportqtab">Export .qtab</option>
+            <option value="del">❌ Delete</option>
+          </select></div><br>`;
+      }).join('');
+
+    phraseLibrary.addEventListener('change', (e) => {
+      if (e.target.matches('select[data-a="menu"]')) {
+        const a = e.target.value;
+        const n = e.target.dataset.n;
+        if (!a || !n) return;
+        libAction(a, n);
+        e.target.value = '';
+      }
+    }, { once: false });
+  }
+
+  function libAction(a, n) {
+    const key = 'qtab_phrase_' + n;
+    if (a === 'del') {
+      if (confirm('Delete phrase "' + n + '"?')) {
+        localStorage.removeItem(key);
+        loadLibrary();
+        notify('Deleted "' + n + '".');
+      }
+    } else if (a === 'load') {
+      const d = JSON.parse(localStorage.getItem(key) || '[]');
+      phrase.length = 0;
+      d.forEach(x => phrase.push(x));
+      document.getElementById('phraseName').value = n;
+      updateSteps();
+      resetStringEditor();
+      resultBox.style.display = 'none';
+      notify('Loaded "' + n + '".');
+
+    } else if (a === 'addSteps') {
+      const d = JSON.parse(localStorage.getItem(key) || '[]');
+      if (!d.length) {
+        notify('No steps in "' + n + '".', 'error');
+        return;
+      }
+      const added = d.length;
+      d.forEach(x => phrase.push(x));
+      updateSteps();
+      notify('Added ' + added + ' steps from "' + n + '"!');
+
+    } else if (a === 'rename') {
+      const newName = prompt('Rename phrase:', n);
+      if (!newName || !newName.trim()) return;
+      const trimmed = newName.trim();
+      if (localStorage.getItem('qtab_phrase_' + trimmed)) {
+        notify('Name already exists.', 'error');
+        return;
+      }
+      const data = localStorage.getItem(key);
+      if (!data) return;
+      localStorage.setItem('qtab_phrase_' + trimmed, data);
+      localStorage.removeItem(key);
+      if (document.getElementById('phraseName').value.trim() === n) {
+        document.getElementById('phraseName').value = trimmed;
+      }
+      loadLibrary();
+      notify('Renamed to "' + trimmed + '".');
+
+    } else if (a === 'dup') {
+      const base = n + '-copy';
+      let newName = base;
+      let counter = 2;
+      while (localStorage.getItem('qtab_phrase_' + newName)) {
+        newName = base + '-' + counter++;
+      }
+      const data = localStorage.getItem(key);
+      if (!data) return;
+      localStorage.setItem('qtab_phrase_' + newName, data);
+      loadLibrary();
+      notify('Duplicated as "' + newName + '".');
+
+    } else if (a === 'export') {
+      const raw = localStorage.getItem(key);
+      if (!raw) {
+        notify('Nothing to export.', 'error');
+        return;
+      }
+      const steps = JSON.parse(raw || '[]');
+      const exportObj = { name: n, steps: steps };
+      const blob = new Blob([JSON.stringify(exportObj, null, 2)], { type: 'application/json' });
+      const aEl = document.createElement('a');
+      aEl.href = URL.createObjectURL(blob);
+      aEl.download = n + '.json';
+      aEl.click();
+      notify('Exported "' + n + '" as JSON.');
+
+    } else if (a === 'exportqtab') {
+      const raw = localStorage.getItem(key);
+      if (!raw) {
+        notify('Nothing to export.', 'error');
+        return;
+      }
+      const steps = JSON.parse(raw || '[]');
+      const qtabSong = buildQtabSongString(steps);
+      const qtab = `#${n}\n${qtabSong}`;
+      const blob = new Blob([qtab], { type: 'text/plain' });
+      const aEl = document.createElement('a');
+      aEl.href = URL.createObjectURL(blob);
+      aEl.download = n + '.qtab';
+      aEl.click();
+      notify('Exported MIDI-ready "' + n + '.qtab".');
+    }
+  }
+
+  // --- EXPORT ALL ---
+  document.getElementById('exportAllBtn').addEventListener('click', () => {
+    const all = {};
+    Object.keys(localStorage)
+      .filter(k => k.startsWith('qtab_phrase_'))
+      .forEach(k => {
+        all[k.replace('qtab_phrase_', '')] = JSON.parse(localStorage.getItem(k) || '[]');
+      });
+    const exportData = { name: 'QtabLibrary', steps: all };
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'QtabLibrary.json';
+    a.click();
+    notify('Exported all phrases as JSON.');
+  });
+
+  // --- IMPORT (unchanged) ---
+  const importZone = document.getElementById('importZone');
+  importZone.addEventListener('dragover', e => {
+    e.preventDefault();
+    e.stopPropagation();
+    importZone.classList.add('dragover');
+  });
+  importZone.addEventListener('dragleave', e => {
+    e.preventDefault();
+    e.stopPropagation();
+    importZone.classList.remove('dragover');
+  });
+  importZone.addEventListener('drop', e => {
+    e.preventDefault();
+    e.stopPropagation();
+    importZone.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file) loadImportFile(file);
+  });
+  importZone.addEventListener('click', () => {
+    const inp = document.createElement('input');
+    inp.type = 'file';
+    inp.accept = '.json';
+    inp.onchange = e => loadImportFile(e.target.files[0]);
+    inp.click();
+  });
+  
+  function loadImportFile(file) {
+    if (!file || !file.name.endsWith('.json')) {
+      notify('Please select a .json file', 'error');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (data && data.name && Array.isArray(data.steps)) {
+          localStorage.setItem('qtab_phrase_' + data.name, JSON.stringify(data.steps));
+          notify('Imported "' + data.name + '".');
+        } else if (data && data.steps && typeof data.steps === 'object') {
+          Object.keys(data.steps).forEach(name => {
+            localStorage.setItem('qtab_phrase_' + name, JSON.stringify(data.steps[name]));
+          });
+          notify('Imported library.');
+        } else {
+          notify('JSON structure not recognized.', 'error');
+        }
+        loadLibrary();
+      } catch (err) {
+        notify('Invalid JSON file', 'error');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  // Init
+  loadLibrary();
+  updateSteps();
+  resetStringEditor();
+});
+</script>
+
+</body>
+</html>
