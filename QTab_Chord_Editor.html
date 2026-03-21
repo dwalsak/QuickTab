@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QTab Chord Library Editor v1.1</title>
+<style>
+  :root {
+    --bg: #fafafa; --bg-alt: #fff; --text: #222; 
+    --accent: #0066cc; --accent-alt: #e3f2fd; --accent-green: #32cd32;
+    --accent-red: #ef4444;
+    --border: #e0e0e0; 
+    --shadow: 0 2px 4px rgba(0,0,0,0.15), 0 8px 25px rgba(0,0,0,0.25);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font: 400 1.1rem/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: var(--text); background: var(--bg);
+    max-width: 720px; margin: 20px auto; padding: 40px 20px 20px 20px;
+  }
+  header {
+    position: sticky; top: 0; height: 50px;
+    backdrop-filter: blur(10px); z-index: 100;
+    background-color: black; color: white;
+    box-shadow: var(--shadow);
+  }
+  header nav {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0 .5rem; height: 50px; line-height: 50px;
+  }
+  .logo { font: 700 1.5rem; color: white !important; text-decoration: none; line-height: 1; display: flex; align-items: center; }
+  .info { font-weight: normal; font-family: sans-serif; font-size: .8rem; }
+
+  button {
+    -webkit-appearance: none; appearance: none;
+    margin: 0; padding: 0; border: none; border-radius: 0;
+    background: none; font: inherit; cursor: pointer; display: inline-block; text-align: center;
+  }
+  .btn-wide {
+    width: 100%; padding: 1rem; border-radius: 0.75rem;
+    font-weight: 600; font-size: 1.1rem;
+    transition: all 0.2s; box-shadow: var(--shadow);
+    margin: 0.5rem 0;
+  }
+  .btn-wide.blue { background: var(--accent); color: white; }
+  .btn-wide.green { background: var(--accent-green); color: white; }
+  .btn-wide.red { background: var(--accent-red); color: white; }
+  .btn-wide:hover { transform: translateY(-1px); }
+
+  #chordName {
+    width: 100%; border: 3px solid var(--accent); border-radius: 8px;
+    padding: 12px 16px; font-size: 1.25rem; font-weight: 600;
+    background: white; box-shadow: 0 2px 8px rgba(0,102,204,0.1);
+    margin-bottom: 24px;
+  }
+
+  label {
+    display: block; margin: 12px 0 8px 0;
+    font-family: sans-serif; font-weight: bold; font-size: 1.2rem;
+  }
+  h1, h2 { font-weight: bold; font-family: sans-serif; font-size: 1.5rem; margin: 12px 0; }
+  h2 { font-size: 1.2rem; }
+  
+  /* TIGHTENED STRING SLIDER FRETBOARD */
+  .string-box {
+    background: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 4px 8px; /* tightened */
+    margin: 4px 0;
+    font-family: monospace;
+    width: 100%;
+    transition: background 0.2s ease;
+  }
+  .string-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 2px; /* tightened */
+  }
+  .slider-container { 
+    padding: 0; 
+    flex: 1;
+  }
+  .string-label {
+    font-weight: bold;
+    color: #333;
+    min-width: 40px;
+    font-size: 14px;
+  }
+  .radio-container {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+  }
+  .radio-container input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--accent-green);
+    transform: scale(1.1);
+    transition: all 0.2s ease;
+  }
+  .radio-container label {
+    font-size: 0.85rem;
+    margin: 0;
+  }
+  .fret-display {
+    font-size: 16px;
+    font-weight: bold;
+    min-width: 32px;
+    text-align: center;
+    color: #666;
+  }
+  input[type="range"] {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: #ffffff;
+    outline: none;
+    -webkit-appearance: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #666;
+    cursor: pointer;
+    border: 2px solid #fff;
+    transition: background 0.2s ease;
+  }
+  .active { background: #d4f4d4 !important; }
+
+  /* Desktop: strings + side controls */
+	/* REPLACE your entire #editorRow, #noteSelectors, #sideControls blocks with this: */
+	
+	#editorRow {
+		display: flex;
+		align-items: stretch;
+		gap: 16px;
+		margin-top: 12px;
+		position: relative; /* positioning context */
+	}
+	
+	#noteSelectors { 
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+	}
+	
+	#sideControls {
+		display: flex;
+		flex-direction: column;
+		width: 70px;
+		border-left: 2px solid var(--border);
+		padding-left: 10px;
+		gap: 4px;
+		height: 446px; /* FIXED HEIGHT - buttons will fill 50% each */
+		justify-content: space-between;
+		align-items: stretch;
+	}
+	
+	#sideControls .btn-wide {
+		writing-mode: vertical-rl;
+		transform: rotate(180deg);
+		padding: 1rem .5rem;
+		font-size: 0.9rem;
+		flex: 1; /* buttons grow to fill space */
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	
+	#sideControls .btn-wide:hover {
+		transform: rotate(180deg) translateY(-2px);
+	}
+	
+	/* MOBILE - FIXED */
+	@media (max-width: 767px) {
+		#editorRow {
+			flex-direction: column; /* REQUIRED - stacks vertically */
+		}
+		#sideControls {
+			border-left: none;
+			padding-left: 0;
+			flex-direction: row;
+			width: 100%;
+			height: auto; /* reset */
+			order: 2; /* moves below strings */
+			gap: 8px;
+		}
+		#sideControls .btn-wide {
+			writing-mode: horizontal-tb;
+			transform: none;
+			font-size: 1rem;
+			flex: 1;
+		}
+		#sideControls .btn-wide:hover {
+			transform: translateY(-1px) !important;
+		}
+	}
+
+  #readout {
+    background: var(--bg-alt); border: 1px solid var(--border);
+    padding: 10px; margin: 10px 0; font-family: monospace;
+  }
+
+  #chordLibrary {
+    background: var(--bg-alt); border: 1px solid var(--border);
+    padding: 10px; margin: 10px 0; 
+    max-height: 260px; min-height: 180px;
+    overflow-y: auto;
+    border-radius: 6px;
+  }
+  .library-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 0;
+    gap: 8px;
+  }
+  .library-item strong { 
+    color: var(--accent); 
+    font-size: 1rem; 
+    flex: 1;
+  }
+  .library-item span { 
+    font-family: monospace; 
+    font-size: 0.9rem; 
+    min-width: 120px;
+    text-align: center;
+  }
+  .library-item button {
+    padding: 0.3rem 0.8rem;
+    font-size: 0.8rem;
+    border-radius: 0.5rem;
+    margin: 0 2px;
+    box-shadow: var(--shadow);
+  }
+  .library-item .load-btn {
+    background: var(--accent);
+    color: white;
+  }
+  .library-item .delete-btn {
+    background: var(--accent-red);
+    color: white;
+  }
+
+  #exportRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 12px 0;
+  }
+
+  .notify { 
+    position:fixed;top:70px;right:20px;z-index:10000;background:#00D800;color:white;
+    padding:12px 20px;border-radius:8px;font-weight:600;box-shadow:var(--shadow);
+    transform:translateX(400px);transition:all 0.3s;max-width:320px; 
+  }
+  .notify.error { background:#ef4444; }
+  .notify.show { transform:translateX(0); }
+
+  a { color: var(--accent); }
+  
+        
+	.menu-toggle {
+		background: none; border: none; color: white; 
+		font-size: 1.5rem; cursor: pointer; padding: 0 .5rem;
+		line-height: 50px; height: 50px;
+	}
+	.menu-toggle:hover { background: rgba(255,255,255,0.1); }
+	.menu-dropdown {
+		position: absolute; top: 50px; right: 0.5rem;
+		background: black; border: 1px solid #444; border-radius: 8px;
+		box-shadow: var(--shadow-header); min-width: 280px;
+		opacity: 0; visibility: hidden; transform: translateY(-10px);
+		transition: all 0.2s ease; z-index: 100;
+	}
+	.menu-dropdown.show {
+		opacity: 1; visibility: visible; transform: translateY(0);
+	}
+	.menu-item {
+		padding: 0rem 1.25rem; border-bottom: 1px solid #333;
+		font-family: sans-serif; color: white;
+	}
+	.menu-item:last-child { border-bottom: none; }
+	.menu-item strong { font-size: 0.95rem; display: block; margin-bottom: 0.25rem; }
+	.menu-item a { 
+		color: #b3d9ff; font-family: monospace; font-size: 0.85rem; 
+		text-decoration: none; word-break: break-all;
+	}
+	.menu-item a:hover { color: white; text-decoration: underline; }
+
+</style>
+</head>
+<body>
+	<header>
+		<nav>		
+			<h1><a href="#home" class="logo">QTab Chord Library Editor <span class="info" style="color: white;padding:8px 0 0 8px;">v 1.1</span></a></h1>
+			<button class="menu-toggle" aria-label="Tools menu">☰</button>
+			<div class="menu-dropdown">
+				<div class="menu-item">
+					<a href="Qtab-Composer_v2.8.html"><strong>QTab Composer</strong></a>
+				</div>
+				<div class="menu-item">
+					<a href="Qtab_midi_builder_v1.1.php"><strong>QTab MIDI Builder</strong></a>
+				</div>
+				<div class="menu-item">
+					<a href="qtab_to_tab_v1.1.php"><strong>QTab-To-Tab</strong></a>
+				</div>
+				<div class="menu-item">
+					<a href="QTab_Chord_Editor.html"><strong>QTab-Chord Editor</strong></a>
+				</div>
+			</div>
+		</nav>
+	</header>
+
+	<form id="chordForm" style="padding-top:12px;">
+		<label for="chordName">Chord Name: <span class="info">(e.g. Am, Cmaj7)</span></label>
+		<input type="text" id="chordName" maxlength="40" placeholder="Am">
+	
+		<h2>Strings / Chord Shape Editor</h2>
+	
+		<div id="editorRow">
+			<div id="noteSelectors"></div>
+			<div id="sideControls">
+				<button id="saveChordBtn" class="btn-wide green" type="button">Save Chord</button>
+				<button id="newChordBtn" class="btn-wide blue" type="button">New</button>
+			</div>
+		</div>
+	
+		<div id="readout">Positions: x x x x x x</div>
+	</form>
+
+<hr style="margin: 12px 0">
+<h2>Chord Library <span class="info">(<span id="chordCount">0</span> chords)</span></h2>
+<input type="text" id="filterInput" placeholder="Filter chords..." style="width:100%;margin-bottom:8px;">
+<div id="chordLibrary">No chords yet</div>
+
+<hr style="margin: 12px 0">
+<h2>Import/Export</h2>
+<div id="exportRow">
+  <button id="exportLibraryBtn" class="btn-wide blue" type="button">Export Library (QtabChordLibrary.json)</button>
+  <button id="importLibraryBtn" class="btn-wide green" type="button">Load/Import Library</button>
+</div>
+
+<footer style="margin-top:24px;">
+  <p><strong>QTab Chord Library Editor v1.1</strong><br>
+  Copyright © 2026 Dennis M. Walsak</p>
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const noteSelectors = document.getElementById('noteSelectors');
+  const readout = document.getElementById('readout');
+  const chordLibraryDiv = document.getElementById('chordLibrary');
+  const chordCountSpan = document.getElementById('chordCount');
+  const filterInput = document.getElementById('filterInput');
+
+  const strings = ['e (1)', 'B (2)', 'G (3)', 'D (4)', 'A (5)', 'E (6)'];
+  const stringStates = {}; // {1..6: {active: bool, value: fret|'X'|null}}
+
+  let chords = {}; // { "Am": { positions: ['x','0','2','2','1','0'] } }
+
+  // NOTIFY
+  function notify(msg, type = 'success') {
+    document.querySelector('.notify')?.remove();
+    const div = document.createElement('div');
+    div.className = 'notify' + (type === 'error' ? ' error' : '');
+    div.textContent = msg;
+    document.body.appendChild(div);
+    setTimeout(() => div.classList.add('show'), 50);
+    setTimeout(() => {
+      div.classList.remove('show');
+      setTimeout(() => div.remove(), 300);
+    }, 2500);
+  }
+
+  // BUILD STRING UI
+  strings.forEach((label, i) => {
+    const stringNum = i + 1;
+    stringStates[stringNum] = { active: false, value: null };
+
+    const div = document.createElement('div');
+    div.id = 'string' + stringNum;
+    div.className = 'string-box';
+    div.innerHTML = `
+      <div class="string-header">
+        <span class="string-label">${label}</span>
+        <div class="radio-container">
+          <input type="checkbox" id="toggle${stringNum}">
+          <label for="toggle${stringNum}">On</label>
+        </div>
+        <span class="fret-display" id="fret${stringNum}">-</span>
+      </div>
+      <div class="slider-container">
+        <input type="range" id="slider${stringNum}" min="0" max="24" value="0" step="1">
+      </div>
+    `;
+    noteSelectors.appendChild(div);
+
+    const box = document.getElementById('string' + stringNum);
+    const toggle = document.getElementById('toggle' + stringNum);
+    const slider = document.getElementById('slider' + stringNum);
+    const fretDisplay = document.getElementById('fret' + stringNum);
+
+    function updateDisplay() {
+      const state = stringStates[stringNum];
+      let text = '-';
+      if (state.active) {
+        if (state.value === null || state.value === 'X') text = 'X';
+        else text = state.value;
+      }
+      fretDisplay.textContent = text;
+      box.classList.toggle('active', state.active);
+    }
+
+    toggle.addEventListener('change', () => {
+      stringStates[stringNum].active = toggle.checked;
+      if (stringStates[stringNum].active && (stringStates[stringNum].value === null)) {
+        stringStates[stringNum].value = 'X';
+      }
+      if (!stringStates[stringNum].active) {
+        stringStates[stringNum].value = null;
+        slider.value = 0;
+      }
+      updateDisplay();
+      updateReadout();
+    });
+
+    slider.addEventListener('input', () => {
+      if (stringStates[stringNum].active) {
+        const val = parseInt(slider.value, 10) || 0;
+        stringStates[stringNum].value = val;
+        updateDisplay();
+        updateReadout();
+      }
+    });
+
+    updateDisplay();
+  });
+
+  function updateReadout() {
+    // collect positions from string 6 down to 1 = E A D G B e
+    const positions = [];
+    for (let i = 6; i >= 1; i--) {
+      const st = stringStates[i];
+      if (!st.active || st.value === null) positions.push('x');
+      else if (st.value === 'X') positions.push('x');
+      else positions.push(String(st.value));
+    }
+    readout.textContent = 'Positions: ' + positions.join(' ');
+  }
+
+  function resetEditor() {
+    Object.keys(stringStates).forEach(i => {
+      stringStates[i].active = false;
+      stringStates[i].value = null;
+      const slider = document.getElementById('slider' + i);
+      const toggle = document.getElementById('toggle' + i);
+      const fretDisplay = document.getElementById('fret' + i);
+      const box = document.getElementById('string' + i);
+      if (slider) slider.value = 0;
+      if (toggle) toggle.checked = false;
+      if (fretDisplay) fretDisplay.textContent = '-';
+      if (box) box.classList.remove('active');
+    });
+    updateReadout();
+  }
+
+  function getChordName() {
+    const n = document.getElementById('chordName').value.trim();
+    if (!n) {
+      notify('Enter chord name first.', 'error');
+      return null;
+    }
+    return n;
+  }
+
+  function loadChordsFromStorage() {
+    try {
+      const raw = localStorage.getItem('qtab_chord_library');
+      chords = raw ? JSON.parse(raw) : {};
+    } catch (e) {
+      chords = {};
+    }
+  }
+
+  function saveChordsToStorage() {
+    localStorage.setItem('qtab_chord_library', JSON.stringify(chords));
+  }
+
+  function renderChordLibrary(filter = '') {
+    const names = Object.keys(chords).sort((a,b) => a.localeCompare(b));
+    const filtered = filter
+      ? names.filter(n => n.toLowerCase().includes(filter.toLowerCase()))
+      : names;
+
+    chordCountSpan.textContent = names.length;
+
+    if (!filtered.length) {
+      chordLibraryDiv.innerHTML = '<em>No chords yet</em>';
+      return;
+    }
+
+    chordLibraryDiv.innerHTML = filtered.map(name => {
+      const chord = chords[name];
+      const pos = chord.positions ? chord.positions.join(' ') : '';
+      return `
+        <div class="library-item">
+          <strong>${name}</strong>
+          <span>${pos}</span>
+          <div>
+            <button type="button" class="load-btn" data-load="${name}">Load</button>
+            <button type="button" class="delete-btn" data-delete="${name}">Delete</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  chordLibraryDiv.addEventListener('click', e => {
+    if (e.target.matches('[data-load]')) {
+      const name = e.target.dataset.load;
+      const chord = chords[name];
+      if (!chord || !Array.isArray(chord.positions)) return;
+
+      document.getElementById('chordName').value = name;
+
+      // positions stored E A D G B e (6..1)
+      chord.positions.forEach((val, idx) => {
+        const stringNum = 6 - idx; // convert back to 1..6
+        const toggle = document.getElementById('toggle' + stringNum);
+        const slider = document.getElementById('slider' + stringNum);
+        const fretDisplay = document.getElementById('fret' + stringNum);
+        const box = document.getElementById('string' + stringNum);
+
+        if (val === 'x' || val === 'X') {
+          stringStates[stringNum].active = false;
+          stringStates[stringNum].value = null;
+          if (toggle) toggle.checked = false;
+          if (slider) slider.value = 0;
+          if (fretDisplay) fretDisplay.textContent = '-';
+          if (box) box.classList.remove('active');
+        } else {
+          const v = parseInt(val, 10) || 0;
+          stringStates[stringNum].active = true;
+          stringStates[stringNum].value = v;
+          if (toggle) toggle.checked = true;
+          if (slider) slider.value = v;
+          if (fretDisplay) fretDisplay.textContent = v;
+          if (box) box.classList.add('active');
+        }
+      });
+
+      updateReadout();
+      notify('Loaded chord "' + name + '".');
+    } else if (e.target.matches('[data-delete]')) {
+      const name = e.target.dataset.delete;
+      if (confirm(`Delete chord "${name}"?`)) {
+        delete chords[name];
+        saveChordsToStorage();
+        renderChordLibrary(filterInput.value);
+        notify(`Deleted chord "${name}".`);
+      }
+    }
+  });
+
+  document.getElementById('saveChordBtn').addEventListener('click', () => {
+    const name = getChordName();
+    if (!name) return;
+
+    const positions = [];
+    for (let i = 6; i >= 1; i--) {
+      const st = stringStates[i];
+      if (!st.active || st.value === null) positions.push('x');
+      else if (st.value === 'X') positions.push('x');
+      else positions.push(String(st.value));
+    }
+
+    chords[name] = { positions: positions };
+    saveChordsToStorage();
+    renderChordLibrary(filterInput.value);
+    notify('Saved chord "' + name + '".');
+  });
+
+  document.getElementById('newChordBtn').addEventListener('click', () => {
+    document.getElementById('chordName').value = '';
+    resetEditor();
+    notify('New chord.');
+  });
+
+  filterInput.addEventListener('input', () => {
+    renderChordLibrary(filterInput.value);
+  });
+
+  document.getElementById('exportLibraryBtn').addEventListener('click', () => {
+    const exportData = {
+      library_name: 'QtabChordLibrary',
+      version: '1.0',
+      chords: chords
+    };
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'QtabChordLibrary.json';
+    a.click();
+    notify('Exported QtabChordLibrary.json');
+  });
+
+  document.getElementById('importLibraryBtn').addEventListener('click', () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/json';
+    input.onchange = e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const data = JSON.parse(reader.result);
+          chords = data.chords || {};
+          saveChordsToStorage();
+          renderChordLibrary();
+          notify('Library imported successfully.');
+        } catch (err) {
+          notify('Error importing library: ' + err.message, 'error');
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  });
+
+  // INIT
+  loadChordsFromStorage();
+  renderChordLibrary();
+  updateReadout();
+});
+
+	// Menu dropdown toggle
+	document.querySelector('.menu-toggle').addEventListener('click', function() {
+		document.querySelector('.menu-dropdown').classList.toggle('show');
+	});
+	
+	// Close menu on outside click
+	document.addEventListener('click', function(e) {
+		if (!e.target.closest('nav')) {
+			document.querySelector('.menu-dropdown').classList.remove('show');
+		}
+	});
+</script>
+
+</body>
+</html>
