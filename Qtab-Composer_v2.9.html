@@ -7,7 +7,7 @@
 <style>
 	:root {
 		--bg: #fafafa; --bg-alt: #fff; --text: #222; 
-		--accent: #0066cc; --accent-alt: #e3f2fd; --accent-green: #32cd32;
+		--accent: #0066cc; --accent-alt: #e3f2fd; --accent-green: #32cd32; --accent-orange: #ff9800;
 		--border: #e0e0e0; 
 		--shadow: 0 2px 4px rgba(0,0,0,0.15), 0 8px 25px rgba(0,0,0,0.25);
 	}
@@ -289,51 +289,66 @@
 	}
 	.menu-item a:hover { color: white; text-decoration: underline; }
 
-/* DESKTOP - Vertical Save button */
-#sideControls {
-  display: flex; flex-direction: column;
-  width: 70px; border-left: 2px solid var(--border);
-  padding-left: 10px; gap: 8px;
-  justify-content: center; align-items: stretch;
+	/* DESKTOP - Vertical Save button */
+	#sideControls {
+		display: flex; flex-direction: column;
+		width: 70px; border-left: 2px solid var(--border);
+		padding-left: 10px; gap: 8px;
+		justify-content: center; align-items: stretch;
+	}
+	
+	#sideControls .btn-wide {
+		writing-mode: vertical-rl; text-orientation: mixed;
+		transform: rotate(180deg);
+		padding: 1rem .5rem; font-size: 0.95rem;
+		flex: 1; display: flex; align-items: center; justify-content: center;
+		font-weight: 700;
+	}
+	
+	#sideControls .btn-wide:hover {
+		transform: rotate(180deg) translateY(-2px);
+	}
+	
+	/* MOBILE - Horizontal */
+	@media (max-width: 767px) {
+		#editorRow {
+			flex-direction: column;
+		}
+		#sideControls {
+			border-left: none !important;        /* ← KILL LEFT BORDER */
+			padding-left: 0 !important;
+			flex-direction: row !important;
+			width: 100% !important;              /* ← FULL WIDTH */
+			height: auto !important;
+			order: 2 !important;
+			gap: 12px !important;
+		}
+		#saveStepBtn {
+			width: 100% !important;              /* ← FULL BUTTON WIDTH */
+			writing-mode: horizontal-tb !important;
+			transform: none !important;
+			text-orientation: mixed !important;
+			font-size: 1.1rem !important;
+			padding: 1rem !important;
+			flex: 1 !important;
+			min-height: 52px !important;
+			border-radius: 0.75rem !important;
+		}
+	}
+	
+	/* Editor Revision */
+.editor-header {
+  margin-bottom: 12px; font-weight: bold; font-size: 1.2rem;
+  /* Matches other h2 styles - no box by default */
 }
 
-#sideControls .btn-wide {
-  writing-mode: vertical-rl; text-orientation: mixed;
-  transform: rotate(180deg);
-  padding: 1rem .5rem; font-size: 0.95rem;
-  flex: 1; display: flex; align-items: center; justify-content: center;
-  font-weight: 700;
+.editor-header.edit-mode { 
+  padding: 12px 16px; background: var(--bg-alt); 
+  border: 2px solid var(--accent-orange); border-radius: 8px;
+  background: rgba(255,152,0,0.05);
 }
-
-#sideControls .btn-wide:hover {
-  transform: rotate(180deg) translateY(-2px);
-}
-
-/* MOBILE - Horizontal */
-@media (max-width: 767px) {
-  #editorRow {
-    flex-direction: column;
-  }
-  #sideControls {
-    border-left: none !important;        /* ← KILL LEFT BORDER */
-    padding-left: 0 !important;
-    flex-direction: row !important;
-    width: 100% !important;              /* ← FULL WIDTH */
-    height: auto !important;
-    order: 2 !important;
-    gap: 12px !important;
-  }
-  #saveStepBtn {
-    width: 100% !important;              /* ← FULL BUTTON WIDTH */
-    writing-mode: horizontal-tb !important;
-    transform: none !important;
-    text-orientation: mixed !important;
-    font-size: 1.1rem !important;
-    padding: 1rem !important;
-    flex: 1 !important;
-    min-height: 52px !important;
-    border-radius: 0.75rem !important;
-  }
+.editor-header span.info { 
+  font-weight: normal; font-size: 0.85rem; color: #666; 
 }
 
 </style>
@@ -426,153 +441,153 @@
 	
 	</header>
 
-<form id="phraseForm" style="padding-top:12px;">
-
-  <label for="phraseName">Phrase Name: <span class="info">(Web safe name, no breaks.)</span></label>
-  <input type="text" id="phraseName" maxlength="80" placeholder="MyPhrase1" style="margin-bottom: 24px;">
-  
-	<h2>Strings / Step Editor</h2>
+	<form id="phraseForm" style="padding-top:12px;">
 	
-	<!-- Chord Selector and Chord Editor located here...  -->
-	<button id="chordBtn" class="btn-wide blue" type="button" style="font-family: monospace; font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 8px;">Select Chord... </button>
-	
-	<!--  Strings / Step Editor Editor located here...  -->
-	<div id="editorRow" style="display: flex; gap: 12px; align-items: stretch;">
-	
-		<!-- Strings left -->
-		<div id="noteSelectors" style="flex: 1;"></div>
+		<label for="phraseName">Phrase Name: <span class="info">(Web safe name, no breaks.)</span></label>
+		<input type="text" id="phraseName" maxlength="80" placeholder="MyPhrase1" style="margin-bottom: 24px;">
 		
-		<!-- Vertical Save button right -->
-		<div id="sideControls" style="
-			display: flex; flex-direction: column;
-			width: 70px; border-left: 2px solid var(--border);
-			padding-left: 10px; gap: 8px; justify-content: center;
-			align-items: stretch;
-		">
-		<button id="saveStepBtn" class="btn-wide green" type="button">
-			S&nbsp;A&nbsp;V&nbsp;E&nbsp;&nbsp;&nbsp;S&nbsp;T&nbsp;E&nbsp;P
-		</button>
-		
+		<div class="editor-header" id="editorHeader">
+			<span>Strings/Step Editor: Step <span id="currentStepNum">1</span></span>
+			<span class="info" id="editorModeInfo">(Add new step)</span>
 		</div>
+		
+		<!-- Chord Selector and Chord Editor...  -->
+		<button id="chordBtn" class="btn-wide blue" type="button" style="font-family: monospace; font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 8px;">Select Chord... </button>
+		
+		<!--  Strings / Step Editor Editor...  -->
+		<div id="editorRow" style="display: flex; gap: 12px; align-items: stretch;">
+		
+			<!-- Strings left -->
+			<div id="noteSelectors" style="flex: 1;"></div>
+			
+			<!-- Vertical Save button right -->
+			<div id="sideControls" style="
+				display: flex; flex-direction: column;
+				width: 70px; border-left: 2px solid var(--border);
+				padding-left: 10px; gap: 8px; justify-content: center;
+				align-items: stretch;
+			">
+			<button id="saveStepBtn" class="btn-wide green" type="button">
+				S&nbsp;A&nbsp;V&nbsp;E&nbsp;&nbsp;&nbsp;S&nbsp;T&nbsp;E&nbsp;P
+			</button>
+			
+			</div>
+		</div>
+		
+		<div style="display: flex; align-items: center; gap: 12px; margin: 12px 0;">
+			<label style="margin: 0; white-space: nowrap; font-weight: bold;">
+				Duration:
+			</label>
+			<select id="durationSel" style="
+				flex: 1; padding: 0.75rem; border: 3px solid var(--accent);
+				border-radius: 8px; border-color: red; background: white; font-size: 1rem;
+				font-family: monospace; cursor: pointer;
+			">
+				<option value="t">t (.125)</option>
+				<option value="t.">t. (.1875)</option>
+				<option value="s">s (0.25)</option>
+				<option value="s.">s. (0.375)</option>
+				<option value="e" selected>e (0.5 beat)</option>
+				<option value="e.">e. (0.75 beat)</option>
+				<option value="q">q (1)</option>
+				<option value="q.">q. (1.5)</option>
+				<option value="h">h (2)</option>
+				<option value="h.">h. (3)</option>
+				<option value="w">w (4)</option>
+				<option value="w.">w. (6)</option>
+			</select>
+			<span class="info" style="white-space: nowrap; font-size: 0.85rem;">
+				(this step)
+			</span>
+		</div>
+		
+		<hr style="margin: 20px 0 8px 0">
+		
+		<div style="margin: 20px 0;">
+			<label>Save Phrase: <span class="info">(Saves entire phrase to library.)</span></label>
+			<button id="savePhraseBtn" class="btn-wide blue" type="button">Save Phrase</button>
+			
+			<label>Additional Actions: <span class="info">(Strings / Step Editor)</span></label>
+			<select id="actionMenu" class="btn-wide blue">
+				<option value="">Select...</option>
+				<option value="arpUp">Arpeggio Step &gt;</option>
+				<option value="arpDown">Arpeggio Step &lt;</option>
+				<option value="reset">Reset</option>
+				<option value="new">New Phrase</option>
+				<option value="view">Preview</option>
+				<option value="copy">Copy</option>
+				<option value="library">Library...</option>
+			</select>
+		</div>
+	</form>
+	
+	<hr style="margin: 12px 0">
+	<div style="width: 100%; margin: 0 0 12px 0;">
+		<h2 style="margin: 0 0 8px 0;">Edit Steps</h2>
+		<div id="stepsList" class="steps" style="
+			height: 240px; overflow-y: auto; padding: 12px; 
+			border: 1px solid var(--border); border-radius: 8px;
+			background: var(--bg-alt);
+		">No steps yet</div>
 	</div>
-  
-	<div style="display: flex; align-items: center; gap: 12px; margin: 12px 0;">
-		<label style="margin: 0; white-space: nowrap; font-weight: bold;">
-			Duration:
-		</label>
-		<select id="durationSel" style="
-			flex: 1; padding: 0.75rem; border: 3px solid var(--accent);
-			border-radius: 8px; border-color: red; background: white; font-size: 1rem;
-			font-family: monospace; cursor: pointer;
+	<div id="error" class="error" style="display:none;"></div>
+	
+	<hr style="margin: 12px 0">
+	<div style="width: 100%; margin: 0 0 12px 0;">
+		<h2 style="margin: 0 0 8px 0;">Output Preview <span class="info">(MIDI-ready .qtab + JSON)</span></h2>
+		<div id="result" class="qtab-output" style="
+			max-height: 220px; overflow-y: auto; padding: 12px; 
+			border: 1px solid var(--border); border-radius: 8px;
+			background: var(--bg-alt); font-family: monospace;
+			white-space: pre-wrap; font-size: 0.9rem;
+			display: none;
+		"></div>
+	</div>
+	
+	<hr style="margin: 12px 0">
+	<h2>Library <span class="info">(Modular components - build → save → reassemble!)</span></h2>
+	
+	<div class="import-zone" id="importZone" style="
+		border: 3px dashed var(--accent); 
+		border-radius: 12px; 
+		padding: 2rem; 
+		text-align: center; 
+		background: var(--accent-alt); 
+		margin: 1.5rem 0; 
+		cursor: pointer;
+		transition: all 0.2s ease;
+	">
+		<strong style="color: var(--accent);">📁 Import JSON</strong><br><br>
+		<span style="color: var(--text);">Drag & drop or click to select .json file</span>
+	</div>
+	
+	<div style="width: 100%; margin: 12px 0 0 0;">
+		<div style="
+			display: flex; justify-content: space-between; align-items: center;
+			gap: 12px; margin-bottom: 8px;
 		">
-			<option value="t">t (.125)</option>
-			<option value="t.">t. (.1875)</option>
-			<option value="s">s (0.25)</option>
-			<option value="s.">s. (0.375)</option>
-			<option value="e" selected>e (0.5 beat)</option>
-			<option value="e.">e. (0.75 beat)</option>
-			<option value="q">q (1)</option>
-			<option value="q.">q. (1.5)</option>
-			<option value="h">h (2)</option>
-			<option value="h.">h. (3)</option>
-			<option value="w">w (4)</option>
-			<option value="w.">w. (6)</option>
-		</select>
-		<span class="info" style="white-space: nowrap; font-size: 0.85rem;">
-			(this step)
-		</span>
+			<span class="info" style="margin: 0;">Saved phrases</span>
+			<!-- This is just a label; actual selects stay per-phrase -->
+		</div>
+	
+		<div id="phraseLibrary" class="phrase-list" style="
+			max-height: 220px; overflow-y: auto;
+			padding: 12px; border: 1px solid var(--border);
+			border-radius: 8px; background: var(--bg-alt);
+		"></div>
 	</div>
-  
-  <hr style="margin: 20px 0 8px 0">
-  
-<!--  <label>Save Step: <span class="info">(Saves current step to Editor below.)</span></label>
-  <button id="saveStepBtn" class="btn-wide green">Save Step</button> -->
-  
-  <div style="margin: 20px 0;">
-    <label>Save Phrase: <span class="info">(Saves entire phrase to library.)</span></label>
-    <button id="savePhraseBtn" class="btn-wide blue" type="button">Save Phrase</button>
-    
-    <label>Additional Actions: <span class="info">(Strings / Step Editor)</span></label>
-    <select id="actionMenu" class="btn-wide blue">
-      <option value="">Select...</option>
-      <option value="arpUp">Arpeggio Step &gt;</option>
-      <option value="arpDown">Arpeggio Step &lt;</option>
-      <option value="reset">Reset</option>
-      <option value="new">New Phrase</option>
-      <option value="view">Preview</option>
-      <option value="copy">Copy</option>
-      <option value="library">Library...</option>
-    </select>
-  </div>
-</form>
-
-<hr style="margin: 12px 0">
-<div style="width: 100%; margin: 0 0 12px 0;">
-  <h2 style="margin: 0 0 8px 0;">Edit Steps</h2>
-  <div id="stepsList" class="steps" style="
-    height: 240px; overflow-y: auto; padding: 12px; 
-    border: 1px solid var(--border); border-radius: 8px;
-    background: var(--bg-alt);
-  ">No steps yet</div>
-</div>
-<div id="error" class="error" style="display:none;"></div>
-
-<hr style="margin: 12px 0">
-<div style="width: 100%; margin: 0 0 12px 0;">
-  <h2 style="margin: 0 0 8px 0;">Output Preview <span class="info">(MIDI-ready .qtab + JSON)</span></h2>
-  <div id="result" class="qtab-output" style="
-    max-height: 220px; overflow-y: auto; padding: 12px; 
-    border: 1px solid var(--border); border-radius: 8px;
-    background: var(--bg-alt); font-family: monospace;
-    white-space: pre-wrap; font-size: 0.9rem;
-    display: none;
-  "></div>
-</div>
-
-<hr style="margin: 12px 0">
-<h2>Library <span class="info">(Modular components - build → save → reassemble!)</span></h2>
-
-<div class="import-zone" id="importZone" style="
-  border: 3px dashed var(--accent); 
-  border-radius: 12px; 
-  padding: 2rem; 
-  text-align: center; 
-  background: var(--accent-alt); 
-  margin: 1.5rem 0; 
-  cursor: pointer;
-  transition: all 0.2s ease;
-">
-  <strong style="color: var(--accent);">📁 Import JSON</strong><br><br>
-  <span style="color: var(--text);">Drag & drop or click to select .json file</span>
-</div>
-
-<div style="width: 100%; margin: 12px 0 0 0;">
-  <div style="
-    display: flex; justify-content: space-between; align-items: center;
-    gap: 12px; margin-bottom: 8px;
-  ">
-    <span class="info" style="margin: 0;">Saved phrases</span>
-    <!-- This is just a label; actual selects stay per-phrase -->
-  </div>
-
-  <div id="phraseLibrary" class="phrase-list" style="
-    max-height: 220px; overflow-y: auto;
-    padding: 12px; border: 1px solid var(--border);
-    border-radius: 8px; background: var(--bg-alt);
-  "></div>
-</div>
-
-<hr style="margin: 12px 0">
-<button id="exportAllBtn" style="margin-top: 18px;">Export All as JSON</button><span class="info"> (Library backup.)</span>
-
-<hr style="margin: 24px 0">
-<footer>
-  <p><strong>QTab Composer v2.9</strong><br>
-  Copyright © 2026 Dennis M. Walsak<br>
-  <a href="PRIMER.pdf" target="_blank">QuickTab Primer</a> • <a href="LICENSE.md" target="_blank">MIT License</a></p>
-  <p><a href="https://modularmedia.com/qtab" target="_blank">modularmedia.com/qtab</a></p>
-</footer>
-
+	
+	<hr style="margin: 12px 0">
+	<button id="exportAllBtn" style="margin-top: 18px;">Export All as JSON</button><span class="info"> (Library backup.)</span>
+	
+	<hr style="margin: 24px 0">
+	<footer>
+		<p><strong>QTab Composer v2.9</strong><br>
+		Copyright © 2026 Dennis M. Walsak<br>
+		<a href="PRIMER.pdf" target="_blank">QuickTab Primer</a> • <a href="LICENSE.md" target="_blank">MIT License</a></p>
+		<p><a href="https://modularmedia.com/qtab" target="_blank">modularmedia.com/qtab</a></p>
+	</footer>
+	
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   // --- GLOBALS ---
@@ -585,17 +600,18 @@ document.addEventListener('DOMContentLoaded', function() {
   const stringStates = {};
   
   let copiedStep = null;
+  let editMode = false;      // NEW: Track edit vs add mode
+  let editStepIndex = -1;    // NEW: Which step is being edited
 
-// NOTE LOOKUP - Efficient chromatic scale
-const NOTES = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
-const STRING_ROOT = {1:4, 2:11, 3:7, 4:2, 5:9, 6:4}; // high e, B, G, D, A, low E
+	// NOTE LOOKUP - Efficient chromatic scale
+	const NOTES = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+	const STRING_ROOT = {1:4, 2:11, 3:7, 4:2, 5:9, 6:4}; // high e, B, G, D, A, low E
 
-function noteAt(stringNum, fret) {
-  return NOTES[(STRING_ROOT[stringNum] + fret) % 12];
-}
+	function noteAt(stringNum, fret) {
+		return NOTES[(STRING_ROOT[stringNum] + fret) % 12];
+	}
 
   // --- CHORD FUNCTIONS ---
-  
 	async function loadChords() {
 		try {
 			const response = await fetch('chords.json');
@@ -618,7 +634,6 @@ function noteAt(stringNum, fret) {
 			console.warn('No chords.json', e);
 		}
 	}
-	
 	
 	function loadChordIntoStrings(chordData) {
 		const positions = chordData.positions || [];
@@ -695,9 +710,7 @@ function noteAt(stringNum, fret) {
 		}
 	}
 	
-
 	// --- CHORD EVENT LISTENER ---
-	
 	document.getElementById('chordBtn').addEventListener('click', (e) => {
 		// Remove existing dropdown
 		const existing = document.getElementById('chordDropdown');
@@ -780,27 +793,27 @@ function noteAt(stringNum, fret) {
     const fretDisplay = document.getElementById('fret' + stringNum);
 
 
-function updateDisplay() {
-  const state = stringStates[stringNum];
-  fretDisplay.textContent = state.active
-    ? (state.value === 'X' ? 'X' : state.value)
-    : '-';
-  
-  // NOTE DISPLAY
-  const noteDisplay = document.getElementById('note' + stringNum);
-  if (noteDisplay) {
-    noteDisplay.textContent = state.active && state.value !== 'X' 
-      ? `(${noteAt(stringNum, state.value)})` 
-      : '';
-  }
-  
-  slider.classList.toggle('slider-dimmed', state.active && state.value === 'X');
-  slider.classList.toggle('active-slider', state.active && state.value !== 'X' && state.value !== null);
-  box.classList.toggle('active', state.active);
-  toggle.checked = state.active;
-  const labelEl = document.getElementById('label' + stringNum);
-  if (labelEl) labelEl.textContent = state.active ? 'On' : 'Off';
-}
+	function updateDisplay() {
+		const state = stringStates[stringNum];
+		fretDisplay.textContent = state.active
+			? (state.value === 'X' ? 'X' : state.value)
+			: '-';
+		
+		// NOTE DISPLAY
+		const noteDisplay = document.getElementById('note' + stringNum);
+		if (noteDisplay) {
+			noteDisplay.textContent = state.active && state.value !== 'X' 
+				? `(${noteAt(stringNum, state.value)})` 
+				: '';
+		}
+		
+		slider.classList.toggle('slider-dimmed', state.active && state.value === 'X');
+		slider.classList.toggle('active-slider', state.active && state.value !== 'X' && state.value !== null);
+		box.classList.toggle('active', state.active);
+		toggle.checked = state.active;
+		const labelEl = document.getElementById('label' + stringNum);
+		if (labelEl) labelEl.textContent = state.active ? 'On' : 'Off';
+	}
 	
     toggle.addEventListener('change', () => {
       stringStates[stringNum].active = toggle.checked;
@@ -833,19 +846,19 @@ function updateDisplay() {
     updateDisplay();
   });
 
-function updateDisplay() {
-  const state = stringStates[stringNum];
-  fretDisplay.textContent = state.active
-    ? (state.value === 'X' || state.value === null ? 'X' : state.value)
-    : '-';
-  slider.classList.toggle('slider-dimmed', state.active && state.value === 'X');
-  slider.classList.toggle('active-slider', state.active && state.value !== 'X' && state.value !== null);
-  box.classList.toggle('active', state.active);
-  box.classList.toggle('string-active', state.active); // ← ADD THIS LINE
-  toggle.checked = state.active;
-  const labelEl = document.getElementById('label' + stringNum);
-  if (labelEl) labelEl.textContent = state.active ? 'On' : 'Off';
-}
+	function updateDisplay() {
+		const state = stringStates[stringNum];
+		fretDisplay.textContent = state.active
+			? (state.value === 'X' || state.value === null ? 'X' : state.value)
+			: '-';
+		slider.classList.toggle('slider-dimmed', state.active && state.value === 'X');
+		slider.classList.toggle('active-slider', state.active && state.value !== 'X' && state.value !== null);
+		box.classList.toggle('active', state.active);
+		box.classList.toggle('string-active', state.active); // ← ADD THIS LINE
+		toggle.checked = state.active;
+		const labelEl = document.getElementById('label' + stringNum);
+		if (labelEl) labelEl.textContent = state.active ? 'On' : 'Off';
+	}
 
   // --- NOTIFY ---
   function notify(msg, type = 'success') {
@@ -883,7 +896,7 @@ function updateDisplay() {
     e.style.display = 'none';
   }
   
-	function resetStringEditor() {
+	function resetStringEditor() {    
 		Object.keys(stringStates).forEach(i => {
 			stringStates[i].active = false;
 			stringStates[i].value = null;
@@ -907,7 +920,33 @@ function updateDisplay() {
 			if (labelEl) labelEl.textContent = 'Off';
 		});
 	}
-  
+ 
+   // NEW: Update editor header
+  function updateEditorHeader() {
+    const header = document.getElementById('editorHeader');
+    const stepNumEl = document.getElementById('currentStepNum');
+    const modeInfoEl = document.getElementById('editorModeInfo');
+    
+    if (!header || !stepNumEl || !modeInfoEl) return;
+    
+    if (editMode && editStepIndex >= 0) {
+      header.textContent = '';
+      header.innerHTML = `
+        <span>Strings/Step Editor: Edit Step <span id="currentStepNum">${editStepIndex + 1}</span></span>
+        <span class="info" id="editorModeInfo">(Click Save to replace Step ${editStepIndex + 1})</span>
+      `;
+      header.classList.add('edit-mode');
+    } else {
+      const nextStepNum = phrase.length + 1;
+      header.textContent = '';
+      header.innerHTML = `
+        <span>Strings/Step Editor: Step <span id="currentStepNum">${nextStepNum}</span></span>
+        <span class="info" id="editorModeInfo">(Add new step)</span>
+      `;
+      header.classList.remove('edit-mode');
+    }
+  }
+ 
   function currentDuration() {
     return document.getElementById('durationSel').value || 'e';
   }
@@ -978,7 +1017,7 @@ function updateDisplay() {
     return true;
   }
 
-  // Button handlers, steps display, library functions... (ALL IDENTICAL TO YOUR ORIGINAL)
+  // Button handlers, steps display, library functions... 
   document.getElementById('saveStepBtn').addEventListener('click', (e) => {
     e.preventDefault();
     const dur = currentDuration();
@@ -987,9 +1026,23 @@ function updateDisplay() {
       showError('Toggle at least one string On to save step.');
       return;
     }
-    phrase.push({ notes: sel, duration: dur });
+    
+    const newStep = { notes: sel, duration: dur };
+    
+    if (editMode && editStepIndex >= 0) {
+      // EDIT MODE: Replace existing step
+      phrase[editStepIndex] = newStep;
+      notify(`✅ Step ${editStepIndex + 1} updated!`);
+      editMode = false;
+      editStepIndex = -1;
+    } else {
+      // ADD MODE: Append new step
+      phrase.push(newStep);
+      notify('✅ Step saved!');
+    }
+    
     updateSteps();
-    notify('✅ Step saved!');
+    resetStringEditor(); // Clears edit state and strings
     clearErr();
   });
 
@@ -1036,11 +1089,14 @@ function updateDisplay() {
     } else if (act === 'new') {
       if (!confirm('Start a new phrase? This will clear the current phrase steps.')) return;
       copiedStep = null;
-      // FIXED: Only step editor menus
       stepsList.querySelectorAll('.step-menu').forEach(m => m.classList.remove('has-copy'));
       phrase.length = 0;
+      
+			editMode = false;
+			editStepIndex = -1;
+			resetStringEditor();  // Clears strings + calls updateEditorHeader()
+
       updateSteps();
-      resetStringEditor();
       resultBox.style.display = 'none';
       document.getElementById('phraseName').value = '';
       notify('New phrase started.');
@@ -1082,30 +1138,96 @@ function updateDisplay() {
     loadLibrary();
   });
 
-  // --- STEPS DISPLAY / EDIT ---
+  // NEW: Load step into string editor
+	function loadStepIntoEditor(stepIndex) {
+		const step = phrase[stepIndex];
+		if (!step || !step.notes) return;
+		
+		// SET EDIT STATE FIRST
+		editMode = true;
+		editStepIndex = stepIndex;
+		updateEditorHeader();  // ← NOW shows correct "Edit Step X"
+		
+		resetStringEditor();   // ← Clears strings but keeps edit state
+		
+		// Load notes (unchanged)
+		step.notes.forEach(noteStr => {
+			const [stringNum, value] = noteStr.split(':');
+			const strNum = parseInt(stringNum);
+			const strState = stringStates[strNum];
+			
+			if (!strState) return;
+			
+			strState.active = true;
+			strState.value = value === 'X' ? 'X' : parseInt(value);
+			
+			const toggle = document.getElementById(`toggle${strNum}`);
+			const slider = document.getElementById(`slider${strNum}`);
+			
+			if (toggle) toggle.checked = true;
+			if (slider) {
+				slider.value = strState.value === 'X' ? 0 : strState.value;
+				slider.dispatchEvent(new Event('input', { bubbles: true }));
+			}
+			updateDisplayForString(strNum);
+		});
+		
+		// Set duration
+		const durationSel = document.getElementById('durationSel');
+		if (durationSel) durationSel.value = step.duration || 'e';
+	}
+
+
+  // NEW: Update display for specific string
+  function updateDisplayForString(stringNum) {
+    const box = document.getElementById('string' + stringNum);
+    const toggle = document.getElementById('toggle' + stringNum);
+    const slider = document.getElementById('slider' + stringNum);
+    const fretDisplay = document.getElementById('fret' + stringNum);
+    const noteDisplay = document.getElementById('note' + stringNum);
+    const labelEl = document.getElementById('label' + stringNum);
+    
+    const state = stringStates[stringNum];
+    if (fretDisplay) {
+      fretDisplay.textContent = state.active ? (state.value === 'X' ? 'X' : state.value) : '-';
+    }
+    if (noteDisplay && state.active && state.value !== 'X') {
+      noteDisplay.textContent = `(${noteAt(stringNum, state.value)})`;
+    } else if (noteDisplay) {
+      noteDisplay.textContent = '';
+    }
+    if (slider) {
+      slider.classList.toggle('slider-dimmed', state.active && state.value === 'X');
+      slider.classList.toggle('active-slider', state.active && state.value !== 'X' && state.value !== null);
+    }
+    if (box) box.classList.toggle('active', state.active);
+    if (toggle) toggle.checked = state.active;
+    if (labelEl) labelEl.textContent = state.active ? 'On' : 'Off';
+  }
+
+  // MODIFIED: updateSteps() - handles Edit action
   function updateSteps() {
     if (!phrase.length) {
       stepsList.textContent = 'No steps yet';
+      updateEditorHeader();
       return;
     }
-    stepsList.innerHTML = phrase.map((p, i) => {
-      const notes = Array.isArray(p.notes) ? p.notes : [];
-      const duration = p.duration || 'e';
-      return `
-        <div class="step-row" data-index="${i}">
-			    <input type="checkbox" class="step-select" data-index="${i}">
-          <span class="editable">${i + 1}. [${notes.join(', ')}]${duration}</span>
-          <select class="step-menu">
-            <option value="">...</option>
-            <option value="copy">Copy</option>
-            <option value="pasteBefore">Paste Before</option>
-            <option value="pasteAfter">Paste After</option>
-            <option value="insert">Insert</option>
-            <option value="edit">Edit</option>
-            <option value="del">Delete</option>
-          </select>
-        </div>`;
-    }).join('');
+    
+    stepsList.innerHTML = phrase.map((p, i) => `
+      <div class="step-row" data-index="${i}">
+        <input type="checkbox" class="step-select" data-index="${i}">
+        <span class="editable">${i + 1}. [${p.notes.join(', ')}]${p.duration}</span>
+        <select class="step-menu">
+          <option value="">...</option>
+          <option value="copy">Copy</option>
+          <option value="pasteBefore">Paste Before</option>
+          <option value="pasteAfter">Paste After</option>
+          <option value="insert">Insert</option>
+          <option value="edit">Edit</option>  <!-- Now in string editor -->
+          <option value="del">Delete</option>
+        </select>
+      </div>
+    `).join('');
 
     stepsList.querySelectorAll('.step-menu').forEach(menu => {
       menu.onchange = (e) => {
@@ -1192,27 +1314,20 @@ function updateDisplay() {
           updateSteps();
           
         } else if (act === 'edit') {
-          const p = phrase[idx];
-          const notes = p.notes || [];
-          const cur = notes.join(', ') + ' ' + (p.duration || 'e');
-          const repl = prompt('Edit step (eg 3:5 or 3:5,5:7 ; duration after space)', cur);
-          if (!repl || !repl.trim()) {
-            e.target.value = '';
-            return;
-          }
-          const trimmed = repl.trim();
-          const lastSpace = trimmed.lastIndexOf(' ');
-          const notesPart = lastSpace > 0 ? trimmed.slice(0, lastSpace) : trimmed;
-          const durPart = lastSpace > 0 ? trimmed.slice(lastSpace + 1) : 'e';
-          const newNotes = notesPart.split(',').map(x => x.trim()).filter(Boolean);
-          if (newNotes.length) {
-            phrase[idx] = { notes: newNotes, duration: durPart };
-            updateSteps();
-          }
+          // NEW: Load step into editor instead of prompt
+          editMode = true;
+          editStepIndex = idx;
+          loadStepIntoEditor(idx);
+          updateEditorHeader();
+          stepsList.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          notify(`Editing Step ${idx + 1} - modify and Save`);
+          e.target.value = '';
+          return;
         }
         e.target.value = '';
       };
     });
+    updateEditorHeader();
   }
 
   // --- LIBRARY  ---
@@ -1430,6 +1545,7 @@ function updateDisplay() {
   loadLibrary();
   updateSteps();
   resetStringEditor();
+  updateEditorHeader();
   loadChords();
 
   // Menu handlers
