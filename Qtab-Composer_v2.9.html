@@ -1080,9 +1080,11 @@ document.addEventListener('DOMContentLoaded', function() {
       notify('Arpeggio < added!');
       
     } else if (act === 'reset') {
+    	editMode = false;
+			editStepIndex = -1;
       resetStringEditor();
+      updateEditorHeader();
       copiedStep = null;
-      // FIXED: Only step editor menus
       stepsList.querySelectorAll('.step-menu').forEach(m => m.classList.remove('has-copy'));
       notify('Strings reset.');
       
