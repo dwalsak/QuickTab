@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>QTab Composer v2.9</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
 <style>
 	:root {
 		--bg: #fafafa; --bg-alt: #fff; --text: #222; 
@@ -80,18 +82,37 @@
 		border-radius: 4px;
 		padding: 6px 12px;
 		margin: 10px 0;
-		font-family: monospace;
+  font-family: 'Space Mono', monospace, 'Courier New', monospace, Consolas !important;
 		width: 100%;
 		max-width: 600px;
 		transition: background 0.2s ease;
 	}
-	
-	.string-header {
-		display: flex;
-		align-items: center;
-		gap: 0;  /* ZERO GAP */
-		margin-bottom: 8px;
-		}
+
+.string-header {
+  display: flex; 
+  align-items: center; 
+  gap: 4px;  /* Small consistent gap */
+  min-height: 28px;  /* Consistent row height */
+}
+
+.fret-display, .note-display {
+  font-family: 'Space Mono', monospace, 'Courier New', monospace, Consolas !important;
+  font-weight: bold; 
+  font-size: 14px;  /* Consistent size */
+  width: 32px;      /* ← FIXED WIDTH for "24" + "(A#)" */
+  text-align: center;
+  flex-shrink: 0;   /* Never shrink */
+  padding: 0 2px;   /* Consistent padding */
+}
+
+.note-display {
+  width: 36px;      /* Slightly wider for "(A#)" */
+  font-size: 12px;  /* Smaller to fit */
+}
+
+.fret-display {
+  min-width: 24px;  /* Covers "0"-"24" + "X" + "-" */
+}
 
 	.slider-container { padding: 0 8px; }
 	.string-label {
@@ -111,19 +132,6 @@
 		transition: all 0.2s ease;
 	}
 	
-	.fret-display {
-		padding-left: 6px;
-		font-weight: bold;
-		text-align: center;
-	}
-	
-	.note-display {
-		font-weight: bold; 
-		min-width: 22px; */
-		text-align: center; 
-		font-family: monospace;
-	}
-
 	input[type="range"] {
 		width: 100%;
 		height: 8px;
@@ -1018,33 +1026,36 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // Button handlers, steps display, library functions... 
-  document.getElementById('saveStepBtn').addEventListener('click', (e) => {
-    e.preventDefault();
-    const dur = currentDuration();
-    const sel = collectCurrentNotesAscending();
-    if (!sel.length) {
-      showError('Toggle at least one string On to save step.');
-      return;
-    }
-    
-    const newStep = { notes: sel, duration: dur };
-    
-    if (editMode && editStepIndex >= 0) {
-      // EDIT MODE: Replace existing step
-      phrase[editStepIndex] = newStep;
-      notify(`✅ Step ${editStepIndex + 1} updated!`);
-      editMode = false;
-      editStepIndex = -1;
-    } else {
-      // ADD MODE: Append new step
-      phrase.push(newStep);
-      notify('✅ Step saved!');
-    }
-    
-    updateSteps();
-    resetStringEditor(); // Clears edit state and strings
-    clearErr();
-  });
+	document.getElementById('saveStepBtn').addEventListener('click', (e) => {
+		e.preventDefault();
+		const dur = currentDuration();
+		const sel = collectCurrentNotesAscending();
+		
+		if (!sel.length) {
+			showError('Toggle at least one string On.');
+			return;
+		}
+		
+		const newStep = { notes: sel, duration: dur };
+		
+		if (editMode && editStepIndex >= 0) {
+			// EDIT MODE: Replace + FULL RESET
+			phrase[editStepIndex] = newStep;
+			notify(`✅ Step ${editStepIndex + 1} updated!`);
+			editMode = false;
+			editStepIndex = -1;
+			resetStringEditor();      // ← Clears strings after edit
+			updateSteps();            // ← Header → "Step X (Add new)"
+		} else {
+			// ADD MODE: Append + KEEP EDITOR LOADED
+			phrase.push(newStep);
+			notify('✅ Step saved!');
+			updateSteps();            // ← Header increments to next step, strings stay loaded
+			// NO resetStringEditor() here - preserves chord/shape for next step
+		}
+		
+		clearErr();
+	});
 
   // --- ACTION MENU ---
   document.getElementById('actionMenu').addEventListener('change', (e) => {
