@@ -4,7 +4,7 @@ QTab Composer is a modular, web-based music notation app, evolved from decades o
 
 **Try It Now**
 
-Double-click `QTab_Composer_v2.8.html` — works offline in any browser.  
+Double-click `QTab_Composer_v2.9.html` — works offline in any browser.  
 
 Create phrases, save your library, export ready-to-parse\*\* files.
 
