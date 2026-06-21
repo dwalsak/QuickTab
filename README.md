@@ -54,7 +54,7 @@ Both are valid.
 
 Copyright & License
 
-**QTab Composer v2.8**  
+**QTab Composer v2.9**  
 Copyright © 2026 Dennis M. Walsak  
 [modularmedia.com/qtab] (https://modularmedia.com/qtab) 
 Released under the [MIT License](LICENSE). 
